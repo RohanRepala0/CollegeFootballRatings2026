@@ -228,7 +228,7 @@ def publish(season: int = typer.Option(...), week: list[int] = typer.Option(None
     rec = season_record(con, cfg, season) if new else None
     for w in sorted(weeks):
         typer.echo(f"wrote {publish_week(con, cfg, season, w, rec=rec)}")
-    typer.echo(f"wrote {publish_season_index(con, season)}")
+    typer.echo(f"wrote {publish_season_index(con, season, cfg=cfg)}")
 
 
 @app.command("backtest-totals")

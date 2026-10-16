@@ -1,6 +1,6 @@
 # 2026 · Week 4
 
-Signals generated Thu Oct 15, 10:00 PM ET, after these games, by the model's fixed rules using data from seasons before 2026 only.
+Backtest week: the model, fit on seasons before 2026 only, applied to this week's games.
 
 ## Signals
 

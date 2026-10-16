@@ -1,6 +1,6 @@
 # 2026 · Week 7
 
-Posted Thu Oct 15, 10:00 PM ET, before every signal's kickoff. Signals are frozen once posted; only results are added.
+Live: posted Thu Oct 15, 10:00 PM ET, before every signal's kickoff. Signals are frozen once posted; only results are added.
 
 ## Signals
 

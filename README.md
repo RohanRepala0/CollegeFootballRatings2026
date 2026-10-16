@@ -6,6 +6,21 @@ distribution over final margins, so any line can be priced. The design is in
 [`CFB_MODEL_PLAN.md`](CFB_MODEL_PLAN.md) and the owner's answers are in
 [`DECISIONS.md`](DECISIONS.md).
 
+## How it works
+
+```mermaid
+flowchart LR
+    SRC["Sources<br/>SP+ sheets · BCF Toys FEI<br/>CFBD scores and lines"] --> LOG[("DuckDB log<br/>point in time")]
+    LOG --> MODEL["Model<br/>sources blended with the market<br/>→ full score distribution"]
+    MODEL --> SIG["Weekly signals<br/>totals at the early number<br/>spreads at your book"]
+    SIG --> POST["2026/week-NN/<br/>posted before kickoff"]
+    POST --> GRADE["Graded on final scores<br/>record · line value · charts"]
+    GRADE -. "refit on past seasons only" .-> MODEL
+```
+
+The weekly signals and season record are in [`2026/`](2026/README.md). How the data moves from source to signal, with
+more detailed diagrams: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+
 ## Setup
 
 ```bash
@@ -96,7 +111,7 @@ cfb status                                # row counts, CFBD calls this month
 Ratings and bets are posted by week in [`2026/`](2026/README.md): each `week-NN/` folder has the week's
 actionable bets (`README.md`, `bets.csv`) and the model's ratings for every FBS game (`ratings.md`,
 `ratings.csv`). A week's bets are frozen once written; re-running only adds results. Weeks 1-6 are
-retro: generated after those games under the same rules.
+backtest weeks: the same rules with a model fit only on earlier seasons.
 
 ```bash
 uv run cfb backfill-cfbd --season 2026 --fresh   # scores and current lines (3 CFBD calls)

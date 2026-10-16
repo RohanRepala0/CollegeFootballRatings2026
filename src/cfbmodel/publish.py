@@ -9,12 +9,12 @@
 A week is written once. Its bets and ratings are then frozen: re-running only
 fills in final scores and results, so a posted pick can never be changed after
 the fact (and the git history shows when each week was committed). A bet written
-after its game kicked off is marked `backfilled` (shown as "retro"): those come from the
+after its game kicked off is marked `backfilled` (shown as "backtest"): those come from the
 walk-forward record and are never presented as posted before kickoff.
 
 Rules. A live week posts the record's headline rule (totals at the early-week
 SP+-sheet O/U, `record.week_picks`) and any spread side that clears the EV bar at
-your books' current numbers (`weekly.bet_card`). A retro week posts the
+your books' current numbers (`weekly.bet_card`). A backtest week posts the
 record's signals for that week (`record.season_record`). All signals are 1 unit;
 spreads at the book's price, totals at -110.
 """
@@ -129,7 +129,7 @@ def live_bets(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig, season: int, 
     return pd.DataFrame(rows)
 
 
-def retro_bets(rec: dict, week: int) -> pd.DataFrame:
+def backtest_bets(rec: dict, week: int) -> pd.DataFrame:
     p = pd.DataFrame([x for x in rec["picks"] if x["week"] == week])
     if p.empty:
         return p
@@ -219,14 +219,14 @@ def _week_readme(bets: pd.DataFrame, rt: pd.DataFrame, season: int, week: int) -
     if len(bets):
         n_bf = int((bets.status == "backfilled").sum())
         if n_bf == len(bets):
-            parts.append(f"Signals generated {_et(posted)}, after these games, by the model's fixed rules using "
-                         f"data from seasons before {season} only.\n")
+            parts.append(f"Backtest week: the model, fit on seasons before {season} only, applied to this week's "
+                         "games.\n")
         elif n_bf:
-            parts.append(f"Posted {_et(posted)}. {n_bf} of {len(bets)} signals were generated after their game "
-                         "kicked off.\n")
+            parts.append(f"Live: posted {_et(posted)}. {n_bf} of {len(bets)} signals are backtest (their games had "
+                         "already kicked off).\n")
         else:
-            parts.append(f"Posted {_et(posted)}, before every signal's kickoff. Signals are frozen once posted; "
-                         "only results are added.\n")
+            parts.append(f"Live: posted {_et(posted)}, before every signal's kickoff. Signals are frozen once "
+                         "posted; only results are added.\n")
         parts += ["## Signals\n", "1 unit each. Totals at −110 at the early-week number from SP+'s sheet; spreads at "
                   "the listed book's price.\n",
                   "| Kickoff | Game | Bet | Rule | Model | EV | Result |", "|---|---|---|---|---|---:|---|"]
@@ -269,9 +269,9 @@ def publish_week(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig, season: in
             raw = live_bets(con, cfg, season, week, params, dist)
             if len(raw):
                 raw = raw[pd.to_datetime(raw.kickoff, utc=True) > now]
-        else:                                               # the week is over: retro signals from the record
+        else:                                               # the week is over: backtest signals from the record
             rec = rec or season_record(con, cfg, season)
-            raw = retro_bets(rec, week)
+            raw = backtest_bets(rec, week)
         bets = raw.copy()
         if len(bets):
             bets["kickoff"] = pd.to_datetime(bets.kickoff, utc=True)
@@ -291,7 +291,9 @@ def publish_week(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig, season: in
     return out
 
 
-def publish_season_index(con: duckdb.DuckDBPyConnection, season: int, root: Path | None = None) -> Path:
+def publish_season_index(con: duckdb.DuckDBPyConnection, season: int, root: Path | None = None,
+                         cfg: BacktestConfig | None = None) -> Path:
+    from .charts import backtest_chart, picture, season_charts
     from .record import real_bets
 
     sdir = (root or config.ROOT) / str(season)
@@ -304,32 +306,64 @@ def publish_season_index(con: duckdb.DuckDBPyConnection, season: int, root: Path
     posted, backfilled = allb[allb.status == "posted"], allb[allb.status == "backfilled"]
     real = real_bets(con, season)
     real_line = "none logged yet" if real.empty else _record_line(real.rename(columns={"profit": "units"}))
+    charts = season_charts(allb, sdir / "charts", season) if len(allb) else []
     parts = [f"# {season} CFB Model\n",
-             "Weekly ratings and bets from SP+ and BCF Toys FEI projections blended with the betting market. Each "
-             "week folder holds that week's actionable bets (README.md, bets.csv) and the model's ratings for every "
-             "game (ratings.md, ratings.csv).\n",
+             "Weekly ratings and signals from SP+ and BCF Toys FEI projections blended with the betting market. Each "
+             "week folder holds that week's signals (README.md, bets.csv) and the model's ratings for every game "
+             "(ratings.md, ratings.csv).\n",
              "## Record\n", "| | Signals | Record |", "|---|---:|---|",
-             f"| Posted before kickoff | {len(posted)} | {_record_line(posted)} |",
-             f"| Retro (generated after the games) | {len(backfilled)} | {_record_line(backfilled)} |",
-             f"| Real bets logged (`cfb log-bet`) | {len(real)} | {real_line} |",
-             "\nPosted signals are frozen when the week is written and graded at the price shown. Retro weeks were "
-             "generated after those games under the same rules. Closing-number signals are graded at the median line "
-             "across books.\n",
-             "## Weeks\n", "| Week | Signals | Record | Status |", "|---|---:|---|---|"]
+             f"| Live, posted before kickoff | {len(posted)} | {_record_line(posted)} |",
+             f"| Backtest, out-of-sample | {len(backfilled)} | {_record_line(backfilled)} |",
+             f"| Real bets logged (`cfb log-bet`) | {len(real)} | {real_line} |\n"]
+    parts += [picture(f"charts/{c}", f"{season} {c} units") for c in charts]
+    parts += ["Live signals are frozen when posted and graded at the price shown. Backtest weeks apply the same rules "
+              f"with a model fit on seasons before {season} only, so it never saw those games. Closing-number signals "
+              "are graded at the median line across books.\n",
+              "## Weeks\n", "| Week | Signals | Record | Status |", "|---|---:|---|---|"]
     for p in weeks:
         b = allb[allb.folder == p.parent.name]
-        status = ("retro" if len(b) and (b.status == "backfilled").all()
-                  else "posted" if len(b) else "no signals")
+        status = ("backtest" if len(b) and (b.status == "backfilled").all()
+                  else "live" if len(b) else "no signals")
         wk = int(p.parent.name.split("-")[1])
         parts.append(f"| [Week {wk}]({p.parent.name}/) | {len(b)} | {_record_line(b) if len(b) else '—'} | {status} |")
+    if cfg is not None:
+        parts += _longer_backtest(con, cfg, season, sdir, backtest_chart, picture)
     parts += ["\n## Rules\n",
               "- **Totals, early number** (headline): bet the over or under at the O/U printed in SP+'s weekly sheet "
               "when the expected value at −110 is at least +2%.",
               "- **Spreads, your book now**: bet a side at FanDuel, DraftKings or Fanatics when it clears +2% EV. "
               "The spread market already prices SP+ and FEI, so these are rare.",
-              "- Retro weeks also include the closing-number rules.",
-              "- Model, backtests and caveats: see the repository README and `reports/`.\n"]
+              "- Backtest weeks also include the closing-number rules.",
+              "- How it works, with diagrams: [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md). Backtests and caveats: "
+              "the repository README and `reports/`.\n"]
     path = sdir / "README.md"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(parts))
     return path
+
+
+def _longer_backtest(con, cfg: BacktestConfig, season: int, sdir: Path, backtest_chart, picture) -> list[str]:
+    """The headline rule over the seasons before `season`, walk-forward (chart drawn once, then reused)."""
+    from copy import copy
+
+    from . import totals
+
+    c = copy(cfg)
+    c.seasons = [s for s in cfg.seasons if s < season]
+    tested = [s for s in c.seasons[c.min_train_seasons:]]
+    if not tested:
+        return []
+    res = totals.run(con, c, only=tested)
+    b = res.bets.get("blend_early", pd.DataFrame())
+    if b.empty:
+        return []
+    w, l, p = (b.result == "win").sum(), (b.result == "loss").sum(), (b.result == "push").sum()
+    span = f"{b.season.min()}–{b.season.max()}"
+    title = f"Totals at the early number, {span} backtest: cumulative units"
+    backtest_chart(b, sdir / "charts", title)
+    return [f"\n## Backtest, {span}\n",
+            picture("charts/backtest", f"Totals at the early number, {span}"),
+            f"The headline rule over {span}, each season scored by a model fit only on earlier seasons: {len(b)} "
+            f"signals, {w}–{l}–{p} ({w / (w + l):.1%}), {b.profit.sum():+.1f} units, ROI {b.profit.mean():+.1%}. "
+            f"The closing total moved toward the signal by {b.clv_points.mean():+.2f} points on average "
+            f"({b.clv_net.mean():+.2f} after the usual early-to-close drift).\n"]
