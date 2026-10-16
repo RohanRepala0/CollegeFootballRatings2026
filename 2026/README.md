@@ -49,4 +49,4 @@ The headline rule over 2022–2025, each season scored by a model fit only on ea
 - **Totals, early number** (headline): bet the over or under at the O/U printed in SP+'s weekly sheet when the expected value at −110 is at least +2%.
 - **Spreads, your book now**: bet a side at FanDuel, DraftKings or Fanatics when it clears +2% EV. The spread market already prices SP+ and FEI, so these are rare.
 - Backtest weeks also include the closing-number rules.
-- Model, backtests and caveats: see the repository README and `reports/`.
+- How it works, with diagrams: [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md). Backtests and caveats: the repository README and `reports/`.

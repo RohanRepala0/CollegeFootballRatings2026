@@ -334,7 +334,8 @@ def publish_season_index(con: duckdb.DuckDBPyConnection, season: int, root: Path
               "- **Spreads, your book now**: bet a side at FanDuel, DraftKings or Fanatics when it clears +2% EV. "
               "The spread market already prices SP+ and FEI, so these are rare.",
               "- Backtest weeks also include the closing-number rules.",
-              "- Model, backtests and caveats: see the repository README and `reports/`.\n"]
+              "- How it works, with diagrams: [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md). Backtests and caveats: "
+              "the repository README and `reports/`.\n"]
     path = sdir / "README.md"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(parts))

@@ -6,6 +6,21 @@ distribution over final margins, so any line can be priced. The design is in
 [`CFB_MODEL_PLAN.md`](CFB_MODEL_PLAN.md) and the owner's answers are in
 [`DECISIONS.md`](DECISIONS.md).
 
+## How it works
+
+```mermaid
+flowchart LR
+    SRC["Sources<br/>SP+ sheets · BCF Toys FEI<br/>CFBD scores and lines"] --> LOG[("DuckDB log<br/>point in time")]
+    LOG --> MODEL["Model<br/>sources blended with the market<br/>→ full score distribution"]
+    MODEL --> SIG["Weekly signals<br/>totals at the early number<br/>spreads at your book"]
+    SIG --> POST["2026/week-NN/<br/>posted before kickoff"]
+    POST --> GRADE["Graded on final scores<br/>record · line value · charts"]
+    GRADE -. "refit on past seasons only" .-> MODEL
+```
+
+The weekly signals and season record are in [`2026/`](2026/README.md). How the data moves from source to signal, with
+more detailed diagrams: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+
 ## Setup
 
 ```bash
