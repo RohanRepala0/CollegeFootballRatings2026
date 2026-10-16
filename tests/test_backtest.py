@@ -85,12 +85,17 @@ def test_production_card_and_tracking(league, monkeypatch, tmp_path):
     assert 0 <= params["alpha"] <= 1.5
     params, dist = weekly.load_production()
     gid = int(league.execute("SELECT min(game_id) FROM games WHERE season = 2023 AND week = 12").fetchone()[0])
-    market.set_line(league, gid, "MyBook", "bet", -3.5, -115, -105)
-    card = weekly.bet_card(league, 2023, 12, params, dist, book="mybook")
+    market.set_line(league, gid, "FanDuel", "bet", -3.5, -115, -105)
+    market.set_line(league, gid, "DraftKings", "bet", -3.5, -105, -115)
+    card = weekly.bet_card(league, 2023, 12, params, dist, books=["fanduel", "draftkings", "fanatics"])
     assert len(card) == 2 * 12 and {"home", "away"} == set(card.side)
-    row = card[(card.game_id == gid) & (card.side == "home")].iloc[0]
-    assert (row.line, row.price, row.priced_at) == (-3.5, -115, "mybook")
-    bet_id = tracking.log_bet(league, gid, "home", -3.5, -115, 1.0, "mybook", float(row.model_margin), dist)
+    home = card[(card.game_id == gid) & (card.side == "home")].iloc[0]
+    away = card[(card.game_id == gid) & (card.side == "away")].iloc[0]
+    assert (home.line, home.price, home.priced_at) == (-3.5, -105, "draftkings")   # best home price
+    assert (away.line, away.price, away.priced_at) == (3.5, -105, "fanduel")       # best away price
+    other = card[card.game_id != gid].iloc[0]
+    assert other.priced_at == "reference@-110"
+    bet_id = tracking.log_bet(league, gid, "home", -3.5, -105, 1.0, "draftkings", float(home.model_margin), dist)
     assert tracking.settle(league, dist) == 1
     b = league.execute("SELECT result, close_line, clv_points FROM bets WHERE bet_id = ?", [bet_id]).fetchone()
     assert b[0] in ("win", "loss", "push") and b[1] is not None

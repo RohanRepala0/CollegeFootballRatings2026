@@ -11,6 +11,7 @@ Owner's answers to plan questions. These override defaults in `CFB_MODEL_PLAN.md
 | D8 | Odds data budget | $0 | Probe OddsPapi free tier for Pinnacle/Circa; fall back to manual line entry. No paid historical sharp lines. |
 | D5 | CFBD API | Owner will register for a free key | Free tier should cover backfill with caching. |
 | D6 | Backtest window | 5 seasons: 2021–2025, plus 2026 YTD as holdout | SP+ covers all; BCF starts 2022; report common-sample results (plan §5). |
+| D9 | Books (Q-books) | FanDuel, DraftKings, Fanatics (New York) | The bet card prices each side at every book with an entered line and keeps the best EV. Pinnacle/Circa stay the sharp reference only. |
 | D7 | Sign convention | `exp_margin` = expected home points − away points | Plan §1. |
 
 ## Pending

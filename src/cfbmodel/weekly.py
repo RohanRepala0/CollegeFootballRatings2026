@@ -53,15 +53,17 @@ def load_production() -> tuple[dict, MarginDistribution]:
 
 
 def bet_card(con: duckdb.DuckDBPyConnection, season: int, week: int, params: dict, dist: MarginDistribution,
-             book: str | None = None, rules: StakingRules | None = None, season_type: str = "regular") -> pd.DataFrame:
+             books: list[str] | None = None, rules: StakingRules | None = None,
+             season_type: str = "regular") -> pd.DataFrame:
     """One row per (game, side) for the week's games that have a market line.
 
     Reference market: sharp fair line from 'bet' snapshots if captured, else the
-    latest retail consensus. Bets are priced at `book`'s line and price when a
-    'bet' snapshot exists for that book (manual entry), else at the reference
-    line at -110.
+    latest retail consensus. Each side is priced at every book in `books` that
+    has a 'bet' line for the game (`cfb line set`), and the best EV is kept
+    (line shopping). With no book line, the side is priced at the reference line at -110.
     """
     rules = rules or StakingRules.from_settings()
+    books = [b.lower() for b in (books if books is not None else default_books())]
     games = con.execute("SELECT * FROM games WHERE season = ? AND week = ? AND season_type = ?",
                         [season, week, season_type]).df()
     if games.empty:
@@ -75,7 +77,8 @@ def bet_card(con: duckdb.DuckDBPyConnection, season: int, week: int, params: dic
     if ref.empty:
         ref = market_margin(con, "close", dist)
     ref = ref.set_index("game_id")
-    book_lines = latest_lines(con, "bet", book.lower()).set_index("game_id") if book else pd.DataFrame()
+    bet_lines = latest_lines(con, "bet")
+    bet_lines = bet_lines[bet_lines.provider.isin(books)]
 
     rows = []
     for g in games.itertuples():
@@ -85,15 +88,17 @@ def bet_card(con: duckdb.DuckDBPyConnection, season: int, week: int, params: dic
         f = float(F.get(g.game_id, np.nan))
         M = mkt if np.isnan(f) else params["alpha"] * mkt + (1 - params["alpha"]) * f
         pmf = dist.pmf(M)
-        if book and g.game_id in book_lines.index:
-            bl = book_lines.loc[g.game_id]
-            home_line = float(bl.home_spread)
-            prices = {"home": bl.spread_price_home, "away": bl.spread_price_away}
-            where = book
-        else:
-            home_line, prices, where = -mkt, {"home": -110, "away": -110}, "reference@-110"
-        for side, line in (("home", home_line), ("away", -home_line)):
-            pr = price(pmf, side, line, float(prices[side]) if pd.notna(prices[side]) else -110)
+        offers = [(b.provider, float(b.home_spread), b.spread_price_home, b.spread_price_away)
+                  for b in bet_lines[bet_lines.game_id == g.game_id].itertuples() if pd.notna(b.home_spread)]
+        if not offers:
+            offers = [("reference@-110", -mkt, -110, -110)]
+        for side in ("home", "away"):
+            quotes = []
+            for where, home_line, p_home, p_away in offers:
+                american = p_home if side == "home" else p_away
+                american = float(american) if pd.notna(american) else -110.0
+                quotes.append((price(pmf, side, home_line if side == "home" else -home_line, american), where))
+            pr, where = max(quotes, key=lambda q: q[0].ev)
             rows.append({
                 "game_id": g.game_id, "game": f"{g.away_team} at {g.home_team}" if not g.neutral_site
                 else f"{g.away_team} vs {g.home_team} (N)", "kickoff": g.start_date,
@@ -101,12 +106,17 @@ def bet_card(con: duckdb.DuckDBPyConnection, season: int, week: int, params: dic
                 if g.game_id in matrix.index else "",
                 "F": round(f, 1) if not np.isnan(f) else None, "mkt_margin": round(mkt, 2),
                 "market_source": ref.loc[g.game_id, "market_source"], "model_margin": round(M, 2),
-                "home_ml_prob": round(moneyline_prob(pmf), 3), "priced_at": where, "side": side,
-                "line": line, "price": pr.american, "p_win": round(pr.p_win, 4), "p_push": round(pr.p_push, 4),
+                "home_ml_prob": round(moneyline_prob(pmf), 3), "side": side, "priced_at": where,
+                "books_checked": ",".join(w for _, w in quotes),
+                "line": pr.line, "price": pr.american, "p_win": round(pr.p_win, 4), "p_push": round(pr.p_push, 4),
                 "ev": round(pr.ev, 4), "fair_odds": round(pr.fair_american) if np.isfinite(pr.fair_american) else None,
                 "stake_units": stake(pr, rules),
             })
     return pd.DataFrame(rows)
+
+
+def default_books() -> list[str]:
+    return config.settings().get("betting", {}).get("books", [])
 
 
 def write_card(card: pd.DataFrame, season: int, week: int) -> Path:

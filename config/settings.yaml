@@ -12,6 +12,7 @@ betting:
   min_ev: 0.02               # Q9: +2% EV per $1
   bankroll_units: 100        # Q10: units, not dollars
   default_price: -110
+  books: [fanduel, draftkings, fanatics]   # Q-books: where the owner can bet (New York)
 
 scope:
   fbs_only: true             # Q5

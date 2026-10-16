@@ -183,26 +183,27 @@ def fit(distribution: str = "best"):
 
 @app.command()
 def week(season: int = typer.Option(...), week: int = typer.Option(...),
-         book: Optional[str] = typer.Option(None, help="Your NY book, as entered with `cfb line set --book`."),
+         book: list[str] = typer.Option(None, help="Repeatable. Default: betting.books in config/settings.yaml."),
          all_rows: bool = typer.Option(False, "--all", help="Show every side, not only bets that pass the EV bar.")):
-    """Phase 6: print and save the bet card for a week."""
+    """Phase 6: print and save the bet card for a week, shopping your books for the best price."""
     from .weekly import bet_card, load_production, write_card
 
     params, dist = load_production()
-    card = bet_card(_con(), season, week, params, dist, book)
+    card = bet_card(_con(), season, week, params, dist, book or None)
     if card.empty:
         typer.echo("no games with market lines for that week")
         raise typer.Exit(1)
     path = write_card(card, season, week)
     show = card if all_rows else card[card.stake_units > 0]
-    cols = ["game", "side", "line", "price", "model_margin", "mkt_margin", "p_win", "p_push", "ev", "fair_odds",
-            "stake_units"]
+    cols = ["game", "side", "priced_at", "line", "price", "model_margin", "mkt_margin", "p_win", "p_push", "ev",
+            "fair_odds", "stake_units"]
     typer.echo(show[cols].to_string(index=False) if len(show) else "no bets pass the EV threshold")
     typer.echo(f"\nfull card: {path}")
 
 
 @line_app.command("set")
-def line_set(game_id: int, book: str = typer.Option(...), spread: float = typer.Option(..., help="Home spread."),
+def line_set(game_id: int, book: str = typer.Option(..., help="fanduel | draftkings | fanatics | pinnacle | circa"),
+             spread: float = typer.Option(..., help="Home spread."),
              price_home: Optional[float] = None, price_away: Optional[float] = None,
              snapshot: str = typer.Option("bet", help="bet | close")):
     """Record a line by hand (e.g. from a public odds screen)."""

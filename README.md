@@ -24,7 +24,7 @@ uv run pytest
 | 2 Margin distribution | Code complete, tested on synthetic data only. Normal (constant and linear sigma), a frequency-reweighted normal, and a key-number mixture, compared by walk-forward log-likelihood. Needs CFBD history to fit. |
 | 3–4 Source adapters | **SP+ verified on real data** (see below). BCF Toys and Massey parsers are written from the plan's column lists and unit-tested on fixtures, but have not seen the real pages. |
 | 5 Blend + backtest | Code complete, tested end to end on a synthetic league. Walk-forward, point-in-time, every combo, alpha fit, calibration, ATS/ROI, CLV, reality-check block. |
-| 6 Weekly pipeline | Bet card works from the DB. Manual line entry works. The OddsPapi probe is not written: its API docs were not reachable. |
+| 6 Weekly pipeline | Bet card works from the DB and line-shops the owner's books (FanDuel, DraftKings, Fanatics), keeping the best EV per side. Manual line entry works. The OddsPapi probe is not written: its API docs were not reachable. |
 | 7 Tracking | `cfb log-bet`, `cfb settle` (close line, CLV in points and probability, result), summary. |
 
 ### SP+ acceptance test (plan §2.2)
@@ -76,7 +76,7 @@ cfb fit-distribution                      # Phase 2 report
 cfb backtest [--distribution best]        # Phase 5 report
 cfb fit                                   # production weights, alpha, distribution
 cfb line set GAME_ID --book fanduel --spread -6.5 --price-home -110 --price-away -110
-cfb week --season 2026 --week 8 --book fanduel
+cfb week --season 2026 --week 8           # shops FanDuel, DraftKings, Fanatics (config/settings.yaml)
 cfb log-bet GAME_ID --side home --line -6.5 --price -110 --stake 1 --book fanduel
 cfb settle
 cfb status                                # row counts, CFBD calls this month
