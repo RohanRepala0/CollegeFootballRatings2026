@@ -188,6 +188,23 @@ def record(season: int = typer.Option(...)):
     typer.echo(f"wrote {md} and {js}")
 
 
+@app.command()
+def picks(season: int = typer.Option(...), week: int = typer.Option(...)):
+    """This week's totals paper picks at the early O/U (the record's headline rule)."""
+    from .record import week_picks
+
+    wp = week_picks(_con(), BacktestConfig.from_settings(), season, week)
+    if wp.empty:
+        typer.echo("no games with an early total and a projection that week")
+        raise typer.Exit(1)
+    path = config.REPORTS_DIR / f"totals_picks_{season}_w{week:02d}.csv"
+    wp.to_csv(path, index=False)
+    show = wp[wp.pick]
+    cols = ["away_team", "home_team", "early_total", "current_total", "F", "model_total", "side", "ev", "p_win"]
+    typer.echo(show[cols].round(3).to_string(index=False) if len(show) else "no total clears the EV bar")
+    typer.echo(f"\nall games: {path}")
+
+
 @app.command("backtest-totals")
 def backtest_totals(distribution: str = typer.Option("best", help="normal | normal_linear_sigma | normal_shift | "
                                                      "frequency_weighted | best (by model.distribution_metric)")):

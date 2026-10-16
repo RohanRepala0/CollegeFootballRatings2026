@@ -145,3 +145,18 @@ def test_drift_is_netted_out_and_information_is_the_slope():
     assert totals.net_of_drift(bets, drift).tolist() == [0.0, 0.0, 0.0]   # pure drift, no skill
     mv = totals.line_movement(pd.concat([frame] * 3, ignore_index=True)).set_index("season")
     assert mv.loc["all", "slope"] == pytest.approx(0.0, abs=1e-9)          # the close ignored F
+
+
+def test_week_picks_use_the_records_fit(league):
+    from cfbmodel import record
+
+    wp = record.week_picks(league, cfg(), 2023, 12)
+    assert len(wp) == 12 and wp.pick.dtype == bool
+    res = totals.run(league, cfg(), only=[2023])
+    assert wp.alpha_early.iloc[0] == pytest.approx(res.season_params[0]["alpha_early"])
+    assert wp.distribution.iloc[0] == res.season_params[0]["distribution"]
+    r = wp.iloc[0]
+    dist = totals.make("normal").fit(*[totals.distribution_frame(league, cfg()).query("season < 2023")[c].values
+                                       for c in ("center", "total")])
+    w, p, l = totals.total_probs(dist.pmf(r.model_total), r.side, r.early_total)
+    assert r.ev == pytest.approx(w * (100 / 110) - l)

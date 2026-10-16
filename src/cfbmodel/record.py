@@ -136,3 +136,53 @@ def write_record(rec: dict, path: Path | None = None) -> tuple[Path, Path]:
         ["week", "game_id", "side", "line_taken", "price_taken", "stake", "book", "result", "profit", "clv_points"]])]
     path.write_text("\n".join(parts))
     return path, json_path
+
+
+def week_picks(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig, season: int, week: int) -> pd.DataFrame:
+    """This week's paper picks under the record's headline rule: totals at the early-week O/U
+    from the SP+ sheet, with the distribution, source weights and early alpha fit on seasons
+    before `season` (what `season_record` uses). Unplayed games included; `current_total` is
+    the latest CFBD consensus, for reference only (picks are made and graded at the early O/U)."""
+    from .blend import combine, fit_weights, point_in_time_projections
+
+    cfg = copy(cfg)
+    cfg.seasons = [s for s in cfg.seasons if s < season]
+    frame, sources = totals.totals_frame(con, cfg)
+    dist_df = totals.distribution_frame(con, cfg)
+    dtrain = dist_df[dist_df.season < season]
+    name = cfg.distribution if cfg.distribution in totals.REGISTRY else totals.best_model(
+        dtrain, cfg.distribution_metric, min_train=max(1, dtrain.season.nunique() - 2))
+    dist = totals.make(name).fit(dtrain.center.values, dtrain.total.values)
+    weights = fit_weights(frame[sources], frame.total)
+    a_early = totals._alpha(combine(frame[sources], weights), frame.early_total.values, frame.total.values, cfg)
+
+    games = con.execute("""SELECT * FROM games WHERE season = ? AND week = ? AND season_type = 'regular'
+                           AND home_division = 'fbs' AND away_division = 'fbs'""", [season, week]).df()
+    proj = point_in_time_projections(con, games, log=False).dropna(subset=["exp_total"])
+    matrix = proj.pivot_table(index="game_id", columns="source", values="exp_total", aggfunc="last")
+    df = (games.merge(totals.early_total(con), on="game_id", how="left")
+          .merge(totals.consensus_total(con, "close")[["game_id", "mkt_total"]].rename(
+              columns={"mkt_total": "current_total"}), on="game_id", how="left")
+          .merge(matrix, left_on="game_id", right_index=True, how="left"))
+    present = [s for s in weights if s in df.columns]
+    F = combine(df[present], {s: weights[s] for s in present}) if present else pd.Series(np.nan, index=df.index)
+    payout = american_to_decimal(cfg.american) - 1
+    rows = []
+    for g, f in zip(df.itertuples(), F):
+        if pd.isna(g.early_total) or pd.isna(f):
+            continue
+        m = float(a_early.blend(np.array([g.early_total]), np.array([f]))[0])
+        pmf = dist.pmf(m)
+        quotes = []
+        for side in ("over", "under"):
+            w, p, l = totals.total_probs(pmf, side, g.early_total)
+            quotes.append((w * payout - l, side, w, p))
+        ev, side, p_win, p_push = max(quotes)
+        rows.append({"game_id": int(g.game_id), "start_date": g.start_date, "away_team": g.away_team,
+                     "home_team": g.home_team, "early_total": float(g.early_total),
+                     "current_total": None if pd.isna(g.current_total) else float(g.current_total),
+                     "F": float(f), "model_total": m, "side": side, "ev": ev, "p_win": p_win, "p_push": p_push,
+                     "pick": ev >= cfg.min_ev,
+                     "final_total": None if pd.isna(g.home_points) else int(g.home_points + g.away_points),
+                     "distribution": name, "alpha_early": a_early.alpha})
+    return pd.DataFrame(rows)

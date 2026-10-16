@@ -81,6 +81,7 @@ cfb fit-distribution                      # Phase 2 report
 cfb backtest [--distribution best]        # Phase 5 report
 cfb backtest-totals                       # same walk-forward backtest for over/unders
 cfb record --season 2026                  # season record: walk-forward paper picks + real logged bets
+cfb picks --season 2026 --week 8           # this week's totals picks at the early O/U (the record's rule)
 cfb fit                                   # production weights, alpha, distribution
 cfb line set GAME_ID --book fanduel --spread -6.5 --price-home -110 --price-away -110
 cfb week --season 2026 --week 8           # shops FanDuel, DraftKings, Fanatics (config/settings.yaml)
