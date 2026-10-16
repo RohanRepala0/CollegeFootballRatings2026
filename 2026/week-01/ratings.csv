@@ -1,0 +1,100 @@
+game_id,kickoff,away_team,home_team,neutral_site,book,home_spread,model_margin,home_win_prob,sp_plus_margin,bcftoys_margin,early_total,current_total,sp_plus_total,bcftoys_total,model_total,away_points,home_points
+401856766,2026-08-29 16:00:00+00:00,North Carolina,TCU,True,draftkings (CFBD line),-7.5,7.5,0.708,,,,,,,,15,10
+401864494,2026-08-29 19:00:00+00:00,San José State,USC,False,draftkings (CFBD line),-37.5,37.25,0.987,,,,,,,,26,42
+401858202,2026-08-29 19:30:00+00:00,NC State,Virginia,False,draftkings (CFBD line),-4.0,4.0,0.616,,,,,,,,8,34
+401864577,2026-08-29 21:30:00+00:00,Jacksonville State,North Dakota State,False,draftkings (CFBD line),-6.5,6.75,0.674,,,,,,,,7,33
+401866408,2026-08-29 22:30:00+00:00,Sacramento State,Eastern Michigan,False,draftkings (CFBD line),-9.5,9.25,0.737,,,,,,,,17,28
+401858201,2026-08-29 23:00:00+00:00,Hawai'i,Stanford,False,draftkings (CFBD line),-4.5,4.75,0.629,,,,,,,,27,37
+401864570,2026-08-29 23:00:00+00:00,New Mexico State,Florida State,False,draftkings (CFBD line),-30.5,30.75,0.969,,,,,,,,17,34
+401862693,2026-08-30 02:00:00+00:00,Memphis,UNLV,False,draftkings (CFBD line),-4.5,4.75,0.629,,,,,,,,27,21
+401858423,2026-09-03 22:00:00+00:00,Massachusetts,Rutgers,False,draftkings (CFBD line),-29.5,29.68,0.965,38.1,34.1,52.5,55.0,54.5,58.6,53.18718854801976,37,21
+401856767,2026-09-03 23:00:00+00:00,Bethune-Cookman,UCF,False,draftkings (CFBD line),-43.5,43.71,0.995,47.3,,,,54.8,,,6,73
+401858204,2026-09-03 23:00:00+00:00,Akron,Wake Forest,False,draftkings (CFBD line),-27.5,27.56,0.953,28.9,28.1,48.5,50.5,44.9,45.3,47.67357521496776,16,38
+401864424,2026-09-03 23:00:00+00:00,Merrimack,Delaware,False,draftkings (CFBD line),-31.5,31.81,0.973,37.1,,,,50.1,,,7,42
+401864425,2026-09-03 23:00:00+00:00,West Georgia,Kennesaw State,False,draftkings (CFBD line),-22.5,22.63,0.918,24.8,,,,44.1,,,0,47
+401866409,2026-09-03 23:00:00+00:00,UAlbany,Buffalo,False,draftkings (CFBD line),-18.5,18.68,0.877,21.8,,,,44.2,,,17,21
+401856663,2026-09-04 00:00:00+00:00,Arkansas-Pine Bluff,Missouri,False,draftkings (CFBD line),-55.5,56.14,1.0,66.9,,,,66.9,,,14,54
+401856776,2026-09-04 00:00:00+00:00,Colorado,Georgia Tech,False,draftkings (CFBD line),-6.5,6.61,0.666,7.8,9.7,50.5,53.0,51.6,52.6,50.81173315838244,14,13
+401858422,2026-09-04 00:00:00+00:00,Eastern Illinois,Minnesota,False,draftkings (CFBD line),-42.5,42.58,0.994,43.9,,,,43.9,,,7,59
+401856768,2026-09-04 01:00:00+00:00,Idaho,Utah,False,draftkings (CFBD line),-38.5,38.56,0.989,39.5,,,,59.0,,,14,66
+401858424,2026-09-04 01:00:00+00:00,UAB,Illinois,False,draftkings (CFBD line),-25.5,26.2,0.945,30.4,27.5,55.5,54.0,56.2,56.1,55.6595211443578,23,42
+401864495,2026-09-04 22:30:00+00:00,San José State,Eastern Michigan,False,draftkings (CFBD line),-1.5,1.51,0.517,2.6,-0.6,54.5,54.75,51.3,52.6,53.81523415440619,27,21
+401858435,2026-09-04 23:00:00+00:00,Indiana State,Purdue,False,draftkings (CFBD line),-35.5,35.67,0.983,38.5,,,,50.2,,,19,44
+401866623,2026-09-04 23:00:00+00:00,North Carolina A&T,Georgia State,False,draftkings (CFBD line),-28.5,28.02,0.957,24.1,,,,49.1,,,10,59
+401856664,2026-09-05 00:00:00+00:00,UTEP,Oklahoma,False,draftkings (CFBD line),-40.5,40.68,0.992,40.6,37.0,50.5,51.25,47.6,42.6,49.55343988279115,0,51
+401856769,2026-09-05 00:00:00+00:00,Long Island University,Kansas,False,draftkings (CFBD line),-44.5,43.46,0.995,47.0,,,,48.9,,,6,51
+401858429,2026-09-05 00:00:00+00:00,Toledo,Michigan State,False,draftkings (CFBD line),-10.0,9.98,0.753,13.8,0.6,49.5,48.5,48.7,48.3,49.29055364322656,20,30
+401858206,2026-09-05 01:00:00+00:00,Miami,Stanford,False,draftkings (CFBD line),24.5,-24.11,0.069,-16.6,-19.8,47.5,46.5,48.1,48.4,47.65708476758008,45,6
+401858436,2026-09-05 01:00:00+00:00,Fresno State,USC,False,draftkings (CFBD line),-21.5,21.92,0.913,19.5,23.0,51.5,51.25,50.8,54.2,51.51460458631456,0,39
+401856634,2026-09-05 16:00:00+00:00,East Carolina,Alabama,False,draftkings (CFBD line),-28.5,27.94,0.956,22.4,23.4,53.5,52.5,47.1,50.0,52.14629792069169,10,48
+401856778,2026-09-05 16:00:00+00:00,Oregon State,Houston,False,draftkings (CFBD line),-21.0,20.41,0.894,15.5,12.7,51.5,50.5,50.7,51.2,51.33804247886447,20,33
+401856780,2026-09-05 16:00:00+00:00,Coastal Carolina,West Virginia,False,draftkings (CFBD line),-21.0,20.66,0.897,15.9,12.9,56.5,54.5,53.6,49.6,55.60620525572217,24,31
+401858208,2026-09-05 16:00:00+00:00,New Hampshire,Syracuse,False,draftkings (CFBD line),-35.5,34.85,0.981,32.3,,,,46.9,,,3,66
+401858425,2026-09-05 16:00:00+00:00,North Texas,Indiana,False,draftkings (CFBD line),-39.5,39.72,0.991,39.9,24.4,55.5,56.75,54.5,56.7,55.38065856094695,16,52
+401858430,2026-09-05 16:00:00+00:00,Ohio,Nebraska,False,draftkings (CFBD line),-23.5,23.56,0.925,23.6,13.3,47.5,47.0,45.1,51.3,47.262124689369216,21,49
+401861962,2026-09-05 16:00:00+00:00,Lafayette,UConn,False,draftkings (CFBD line),-21.5,20.21,0.892,15.4,,,,57.0,,,7,56
+401862701,2026-09-05 16:00:00+00:00,Bryant,Army,False,draftkings (CFBD line),-37.5,37.16,0.986,35.7,,,,48.4,,,3,59
+401866410,2026-09-05 16:00:00+00:00,Tarleton State,Bowling Green,False,draftkings (CFBD line),-1.5,1.64,0.52,-0.3,,,,58.0,,,20,13
+401869960,2026-09-05 16:00:00+00:00,Liberty,James Madison,False,draftkings (CFBD line),-6.0,6.23,0.655,7.0,16.9,52.5,50.5,55.5,51.9,53.01632043595221,13,20
+401858207,2026-09-05 16:30:00+00:00,Miami (OH),Pittsburgh,False,draftkings (CFBD line),-16.5,16.11,0.845,12.7,15.9,49.5,47.25,48.5,43.5,49.00074787584361,14,59
+401858432,2026-09-05 16:30:00+00:00,Ball State,Ohio State,False,draftkings (CFBD line),-50.5,51.16,0.999,60.4,52.8,56.5,56.0,60.4,47.4,56.73220866395178,3,56
+401856665,2026-09-05 16:45:00+00:00,Kent State,South Carolina,False,draftkings (CFBD line),-35.5,36.0,0.984,37.5,32.9,53.5,53.0,49.8,49.5,52.61309692796591,0,57
+401856659,2026-09-05 17:00:00+00:00,Youngstown State,Kentucky,False,draftkings (CFBD line),-22.5,22.01,0.913,18.0,,,,57.3,,,13,45
+401856779,2026-09-05 17:00:00+00:00,Southeast Missouri State,Iowa State,False,draftkings (CFBD line),-29.5,29.79,0.965,34.7,,,,45.7,,,10,38
+401864496,2026-09-05 17:00:00+00:00,Duquesne,Air Force,False,draftkings (CFBD line),-31.5,30.1,0.967,31.7,,,,50.2,,,0,34
+401862698,2026-09-05 18:00:00+00:00,Rhode Island,Temple,False,draftkings (CFBD line),-14.5,13.84,0.813,2.8,,,,53.2,,,14,38
+401856658,2026-09-05 19:00:00+00:00,Tennessee State,Georgia,False,draftkings (CFBD line),-49.5,50.49,0.999,71.4,,,,71.4,,,3,63
+401856636,2026-09-05 19:30:00+00:00,Baylor,Auburn,True,draftkings (CFBD line),-6.5,6.54,0.662,7.7,6.2,59.5,58.5,53.3,50.0,57.866237660419614,16,17
+401856666,2026-09-05 19:30:00+00:00,Furman,Tennessee,False,draftkings (CFBD line),-49.5,49.29,0.998,49.9,,,,57.8,,,9,56
+401856667,2026-09-05 19:30:00+00:00,Texas State,Texas,False,draftkings (CFBD line),-29.5,29.36,0.964,27.4,26.1,59.5,60.75,60.4,52.8,59.310865899275406,7,59
+401856777,2026-09-05 19:30:00+00:00,Boston College,Cincinnati,False,draftkings (CFBD line),-7.0,7.13,0.692,8.1,11.8,51.5,51.25,53.7,56.0,52.13929592864419,15,34
+401858209,2026-09-05 19:30:00+00:00,Tulane,Duke,False,draftkings (CFBD line),-9.5,8.79,0.73,12.4,3.0,50.5,51.0,55.4,54.6,51.61137147321151,3,17
+401858433,2026-09-05 19:30:00+00:00,Boise State,Oregon,False,draftkings (CFBD line),-24.5,24.86,0.937,26.6,27.2,51.5,52.5,53.0,52.5,51.82675520278643,27,34
+401858434,2026-09-05 19:30:00+00:00,Marshall,Penn State,False,draftkings (CFBD line),-23.5,23.45,0.924,26.9,26.7,54.5,52.75,57.9,49.1,54.83611060051143,0,45
+401862694,2026-09-05 19:30:00+00:00,The Citadel,Charlotte,False,draftkings (CFBD line),-20.5,21.08,0.903,30.8,,,,54.5,,,43,41
+401862696,2026-09-05 19:30:00+00:00,Towson,Navy,False,draftkings (CFBD line),-31.5,31.36,0.971,37.5,,,,49.5,,,15,42
+401862700,2026-09-05 19:30:00+00:00,UT Rio Grande Valley,UTSA,False,draftkings (CFBD line),-28.5,28.29,0.958,24.8,,,,54.4,,,16,45
+401864499,2026-09-05 19:30:00+00:00,Fordham,North Dakota State,False,draftkings (CFBD line),-41.5,42.16,0.994,53.2,,,,53.2,,,0,38
+401866627,2026-09-05 19:30:00+00:00,Maine,App State,False,draftkings (CFBD line),-21.0,21.02,0.903,21.4,,,,49.0,,,3,55
+401856772,2026-09-05 19:45:00+00:00,Oklahoma State,Tulsa,False,draftkings (CFBD line),13.5,-13.02,0.201,-10.6,-6.0,60.5,57.5,54.2,47.3,58.652739791917824,10,24
+401856635,2026-09-05 20:15:00+00:00,North Alabama,Arkansas,False,draftkings (CFBD line),-40.5,40.61,0.992,42.4,,,,54.7,,,14,31
+401858426,2026-09-05 20:15:00+00:00,Northern Illinois,Iowa,False,draftkings (CFBD line),-31.5,31.84,0.973,34.3,31.4,45.5,44.5,47.5,41.8,45.67008789329577,0,40
+401868356,2026-09-05 21:00:00+00:00,Alcorn State,Southern Miss,False,draftkings (CFBD line),-20.5,19.8,0.888,16.5,,,,51.3,,,3,49
+401860878,2026-09-05 22:00:00+00:00,Wyoming,Colorado State,False,draftkings (CFBD line),-2.5,2.66,0.55,1.7,0.2,47.5,46.0,43.1,45.7,46.60131882781496,13,35
+401867973,2026-09-05 22:00:00+00:00,Norfolk State,Old Dominion,False,draftkings (CFBD line),-41.5,40.97,0.992,36.2,,,,50.8,,,10,31
+401856668,2026-09-05 23:00:00+00:00,Missouri State,Texas A&M,False,draftkings (CFBD line),-38.5,39.49,0.99,42.6,32.2,52.5,53.5,52.7,53.7,52.59985042483128,0,50
+401856669,2026-09-05 23:00:00+00:00,Austin Peay,Vanderbilt,False,draftkings (CFBD line),-29.5,29.13,0.963,27.1,,,,57.7,,,9,28
+401856770,2026-09-05 23:00:00+00:00,Abilene Christian,Texas Tech,False,draftkings (CFBD line),-45.5,45.0,0.996,45.0,,,,50.5,,,10,33
+401856771,2026-09-05 23:00:00+00:00,Nicholls,Kansas State,False,draftkings (CFBD line),-41.5,41.16,0.993,39.7,,,,50.8,,,3,71
+401860880,2026-09-05 23:00:00+00:00,Idaho State,Utah State,False,draftkings (CFBD line),-15.5,14.81,0.829,11.6,,,,55.5,,,29,17
+401862695,2026-09-05 23:00:00+00:00,Arkansas State,Memphis,False,draftkings (CFBD line),-10.5,10.95,0.771,19.4,16.9,55.5,52.25,56.8,50.7,55.48418406247246,24,42
+401862697,2026-09-05 23:00:00+00:00,Houston Christian,Rice,False,draftkings (CFBD line),-22.5,23.02,0.921,27.5,,,,50.4,,,3,31
+401862699,2026-09-05 23:00:00+00:00,Florida International,South Florida,False,draftkings (CFBD line),-14.5,14.65,0.827,15.2,21.5,53.5,53.25,57.0,49.3,53.91769503668567,9,19
+401867866,2026-09-05 23:00:00+00:00,Murray State,Middle Tennessee,False,draftkings (CFBD line),-22.5,22.57,0.918,23.8,,,,52.9,,,14,38
+401868140,2026-09-05 23:00:00+00:00,Eastern Kentucky,Jacksonville State,False,draftkings (CFBD line),-22.5,22.59,0.918,28.4,,,,51.7,,,7,49
+401868170,2026-09-05 23:00:00+00:00,Charleston Southern,Georgia Southern,False,draftkings (CFBD line),-28.5,28.34,0.959,29.8,,,,45.5,,,0,31
+401868316,2026-09-05 23:00:00+00:00,SE Louisiana,South Alabama,False,draftkings (CFBD line),-13.5,13.75,0.81,,,,,,,,14,39
+401870763,2026-09-05 23:00:00+00:00,Sam Houston,Troy,False,draftkings (CFBD line),-15.5,16.17,0.845,20.5,16.0,53.5,52.75,53.6,43.5,52.99061225934683,21,24
+401856660,2026-09-05 23:30:00+00:00,Clemson,LSU,False,draftkings (CFBD line),-10.0,9.89,0.75,9.8,4.2,51.5,49.25,45.9,45.2,50.14468278574105,10,51
+401856662,2026-09-05 23:30:00+00:00,UL Monroe,Mississippi State,False,draftkings (CFBD line),-28.5,28.78,0.961,36.2,27.7,56.5,54.75,54.7,50.6,55.85989650388049,13,62
+401858211,2026-09-05 23:30:00+00:00,VMI,Virginia Tech,False,draftkings (CFBD line),-54.5,55.26,0.999,68.0,,,,68.0,,,3,73
+401858428,2026-09-05 23:30:00+00:00,Western Michigan,Michigan,False,draftkings (CFBD line),-27.5,27.39,0.952,25.5,25.8,47.5,50.0,46.9,48.8,47.45899905286816,12,13
+401869129,2026-09-05 23:30:00+00:00,Northwestern State,Louisiana Tech,False,draftkings (CFBD line),-44.5,44.54,0.996,45.3,,,,51.2,,,6,80
+401856637,2026-09-05 23:45:00+00:00,Florida Atlantic,Florida,False,draftkings (CFBD line),-26.5,26.34,0.946,23.8,23.1,59.5,59.5,54.1,51.2,58.07568401719306,21,66
+401856775,2026-09-06 00:00:00+00:00,Utah Tech,BYU,False,draftkings (CFBD line),-50.5,51.29,0.999,73.1,,,,73.1,,,7,63
+401858427,2026-09-06 00:00:00+00:00,Hampton,Maryland,False,draftkings (CFBD line),-45.5,45.83,0.997,51.4,,,,51.4,,,0,62
+401858431,2026-09-06 00:00:00+00:00,South Dakota State,Northwestern,False,draftkings (CFBD line),-14.0,12.85,0.796,6.1,,,,55.0,,,18,34
+401869142,2026-09-06 00:00:00+00:00,Lamar,Louisiana,False,draftkings (CFBD line),-20.5,19.79,0.888,12.0,,,,46.0,,,7,38
+401870790,2026-09-06 01:00:00+00:00,Mercyhurst,New Mexico State,False,draftkings (CFBD line),-29.5,29.49,0.964,37.8,,,,44.8,,,14,51
+401856773,2026-09-06 01:30:00+00:00,Northern Arizona,Arizona,False,draftkings (CFBD line),-33.5,32.52,0.975,32.8,,,,58.6,,,7,35
+401860879,2026-09-06 01:30:00+00:00,Portland State,San Diego State,False,draftkings (CFBD line),-38.5,39.71,0.991,43.3,,,,51.9,,,20,53
+401856774,2026-09-06 02:00:00+00:00,Morgan State,Arizona State,False,draftkings (CFBD line),-43.5,44.3,0.995,45.1,,,,45.1,,,7,70
+401864497,2026-09-06 02:00:00+00:00,UNLV,Hawai'i,False,draftkings (CFBD line),2.5,-2.77,0.443,-3.0,-3.2,58.5,55.5,57.3,54.6,58.0750231816847,21,6
+401864498,2026-09-06 02:00:00+00:00,Central Michigan,New Mexico,False,draftkings (CFBD line),-11.5,11.44,0.777,17.7,7.9,46.5,47.25,48.9,47.7,47.00170217528588,7,38
+401866411,2026-09-06 02:00:00+00:00,Mississippi Valley State,Sacramento State,False,draftkings (CFBD line),-38.5,38.72,0.989,42.5,,,,55.1,,,0,52
+401858210,2026-09-06 02:30:00+00:00,UCLA,California,False,draftkings (CFBD line),2.5,-2.36,0.465,0.1,-0.5,53.5,53.5,53.6,51.0,53.38635255632948,45,24
+401864432,2026-09-06 02:30:00+00:00,Western Kentucky,Nevada,False,draftkings (CFBD line),1.5,-0.43,0.5,-1.9,-6.9,52.5,51.5,51.8,47.9,52.12941736391812,14,49
+401858437,2026-09-06 20:00:00+00:00,Washington State,Washington,False,draftkings (CFBD line),-23.5,23.05,0.922,22.5,13.7,50.5,51.25,47.5,48.8,49.862319206306445,10,24
+401856661,2026-09-06 23:30:00+00:00,Louisville,Ole Miss,True,draftkings (CFBD line),-6.5,6.5,0.66,5.4,8.8,55.5,54.75,52.6,52.5,54.81199021015315,38,41
+401858438,2026-09-06 23:30:00+00:00,Wisconsin,Notre Dame,True,draftkings (CFBD line),-21.0,20.83,0.9,22.7,20.8,47.5,46.0,47.0,44.3,47.2398208633356,13,41
+401858212,2026-09-07 23:30:00+00:00,SMU,Florida State,False,draftkings (CFBD line),3.0,-2.85,0.437,-1.6,2.2,52.5,53.5,51.4,55.2,52.44154063168645,27,24

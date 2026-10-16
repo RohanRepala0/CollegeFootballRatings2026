@@ -737,6 +737,14 @@ def discover_tabs(fetcher: Fetcher, season: int, google_api_key: str | None, ref
     return tabs
 
 
+def workbook_xlsx_url(season: int) -> str:
+    """The whole season workbook as .xlsx. Works without an API key for shared and published sheets."""
+    spec = config.sources()["sp_plus"][season]
+    if spec["type"] == "sheet":
+        return f"https://docs.google.com/spreadsheets/d/{spec['id']}/export?format=xlsx"
+    return f"https://docs.google.com/spreadsheets/d/e/{spec['pub_id']}/pub?output=xlsx"
+
+
 def tab_csv_url(season: int, gid: str) -> str:
     spec = config.sources()["sp_plus"][season]
     if spec["type"] == "sheet":

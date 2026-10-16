@@ -102,6 +102,8 @@ def validate_sp_db(xlsx: Path = typer.Option(...), season: int = typer.Option(..
 
 @app.command("ingest-sp")
 def ingest_sp(season: int = typer.Option(...), xlsx: Optional[Path] = typer.Option(None, help="Use a downloaded workbook."),
+              download: bool = typer.Option(False, help="Download the season workbook (.xlsx export, no API key) "
+                                                        "and ingest it. Use this each week."),
               live_week: Optional[int] = typer.Option(None, help="Snapshot this week's tab fresh.")):
     """SP+ projections, early lines and ratings into the DB (needs CFBD games + teams)."""
     from .fetch import Fetcher
@@ -111,6 +113,9 @@ def ingest_sp(season: int = typer.Option(...), xlsx: Optional[Path] = typer.Opti
 
     con = _con()
     games, resolver = GameIndex.from_db(con, [season]), _resolver(con)
+    if download:
+        xlsx = Fetcher(con).fetch("sp_plus", sp_plus.workbook_xlsx_url(season), fresh=True, ext="xlsx").path
+        typer.echo(f"downloaded {xlsx}")
     if xlsx is not None:
         sheet = sp_plus.read_workbook(xlsx, season)
         fetched_at, live_pub = db.utcnow(), {}
@@ -203,6 +208,27 @@ def picks(season: int = typer.Option(...), week: int = typer.Option(...)):
     cols = ["away_team", "home_team", "early_total", "current_total", "F", "model_total", "side", "ev", "p_win"]
     typer.echo(show[cols].round(3).to_string(index=False) if len(show) else "no total clears the EV bar")
     typer.echo(f"\nall games: {path}")
+
+
+@app.command()
+def publish(season: int = typer.Option(...), week: list[int] = typer.Option(None, help="Repeatable."),
+            all_weeks: bool = typer.Option(False, "--all", help="Every week with projections so far.")):
+    """Write <season>/week-NN/ folders (ratings and actionable bets) and <season>/README.md.
+
+    A week is frozen once written: re-running only adds final scores and results."""
+    from .publish import publish_season_index, publish_week, week_dir
+    from .record import season_record
+
+    con, cfg = _con(), BacktestConfig.from_settings()
+    weeks = set(week or [])
+    if all_weeks:
+        weeks |= set(con.execute("""SELECT DISTINCT g.week FROM source_projections p JOIN games g USING (game_id)
+                                    WHERE g.season = ? AND g.season_type = 'regular'""", [season]).df().week.astype(int))
+    new = [w for w in weeks if not (week_dir(season, w) / "bets.csv").exists()]
+    rec = season_record(con, cfg, season) if new else None
+    for w in sorted(weeks):
+        typer.echo(f"wrote {publish_week(con, cfg, season, w, rec=rec)}")
+    typer.echo(f"wrote {publish_season_index(con, season)}")
 
 
 @app.command("backtest-totals")

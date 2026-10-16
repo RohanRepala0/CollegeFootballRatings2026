@@ -159,3 +159,8 @@ def test_projected_total_uses_ou_diff_when_consistent():
     tab = sp_plus.parse_week_rows(rows, 2023, 9, "regular", "FBS week 9")
     assert [g.proj_total for g in tab.games] == [58.3, 56.4, 43.0]   # last: 45.9 is > 1 from 43, keep rounded
     assert [i["issue"] for i in tab.issues] == ["ou_diff_disagrees_with_proj_score"]
+
+
+def test_workbook_xlsx_url_needs_no_key():
+    assert sp_plus.workbook_xlsx_url(2026).endswith("/export?format=xlsx")
+    assert "/pub?output=xlsx" in sp_plus.workbook_xlsx_url(2023)     # 2023 is published-to-web

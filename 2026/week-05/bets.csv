@@ -1,0 +1,5 @@
+season,week,game_id,kickoff,game,rule,market,side,line,price,pick,model,ev,posted_at,status,final,result,units
+2026,5,401858476,2026-10-03 00:00:00+00:00,Penn State at Northwestern,"Spreads, closing number",spread,away,-2.75,-110.0,Penn State −2.75,,0.0297615317,2026-10-16T02:00:50.412581+00:00,backfilled,"Penn State 13, Northwestern 34",loss,-1.0
+2026,5,401862791,2026-10-03 16:00:00+00:00,Navy at Air Force,"Totals, early number",total,over,46.5,-110.0,Over 46.5,,0.0834278933,2026-10-16T02:00:50.412581+00:00,backfilled,"Navy 9, Air Force 14",loss,-1.0
+2026,5,401856710,2026-10-03 19:30:00+00:00,Auburn at Tennessee,"Totals, early number",total,under,55.5,-110.0,Under 55.5,,0.0439076417,2026-10-16T02:00:50.412581+00:00,backfilled,"Auburn 14, Tennessee 24",win,0.9090909090909092
+2026,5,401869842,2026-10-03 23:30:00+00:00,Army at Louisiana Tech,"Totals, early number",total,over,44.5,-110.0,Over 44.5,,0.049658944,2026-10-16T02:00:50.412581+00:00,backfilled,"Army 29, Louisiana Tech 31",win,0.9090909090909092
