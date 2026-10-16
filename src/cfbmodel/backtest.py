@@ -143,13 +143,15 @@ def simulate_bets(test: pd.DataFrame, model_margin: np.ndarray, dist: MarginDist
 
 def ats_summary(bets: pd.DataFrame) -> dict:
     if bets.empty:
-        return {"bets": 0, "w": 0, "l": 0, "p": 0, "win_pct": np.nan, "roi": np.nan, "se": np.nan,
+        return {"bets": 0, "w": 0, "l": 0, "p": 0, "win_pct": np.nan, "win_se": np.nan, "roi": np.nan, "roi_se": np.nan,
                 "clv_points": np.nan, "clv_prob": np.nan}
     w, l, p = (bets.result == "win").sum(), (bets.result == "loss").sum(), (bets.result == "push").sum()
     n = w + l
     return {"bets": len(bets), "w": int(w), "l": int(l), "p": int(p), "win_pct": w / n if n else np.nan,
-            "roi": bets.profit.sum() / len(bets), "se": 0.5 / math.sqrt(n) if n else np.nan,
-            "clv_points": bets.clv_points.mean(), "clv_prob": bets.clv_prob.mean()}
+            "win_se": 0.5 / math.sqrt(n) if n else np.nan, "roi": bets.profit.sum() / len(bets),
+            "roi_se": float(bets.profit.std(ddof=1) / math.sqrt(len(bets))) if len(bets) > 1 else np.nan,
+            "clv_points": bets.clv_points.mean(), "clv_prob": bets.clv_prob.mean(),
+            **({"clv_net": bets.clv_net.mean()} if "clv_net" in bets else {})}
 
 
 def error_metrics(pred: pd.Series, actual: pd.Series) -> dict:
@@ -194,7 +196,9 @@ class BacktestResult:
     dist_comparison: pd.DataFrame = field(default_factory=pd.DataFrame)
 
 
-def run(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig) -> BacktestResult:
+def run(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig, only: list[int] | None = None) -> BacktestResult:
+    """Walk-forward over cfg.seasons; `only` restricts which test seasons are scored (and skips the
+    distribution comparison, which does not depend on it)."""
     frame, sources = backtest_frame(con, cfg)
     dist_df = distribution_frame(con, cfg)
     result = BacktestResult(cfg, sources, frame)
@@ -202,7 +206,7 @@ def run(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig) -> BacktestResult:
         return result
 
     seasons = sorted(frame.season.unique())
-    test_seasons = seasons[cfg.min_train_seasons:]
+    test_seasons = [s for s in seasons[cfg.min_train_seasons:] if only is None or s in only]
     combo_rows, err_rows, cal_parts, bet_parts = [], [], [], {"blend_close": [], "blend_early": []}
     test_frames, log_losses = [], []
     for s in test_seasons:
@@ -249,6 +253,8 @@ def run(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig) -> BacktestResult:
                                                                         test.home_margin).items()},
                                **ats_summary(bets)})
 
+    if not test_frames:
+        return result
     tested = pd.concat(test_frames)
     result.frame = tested
     common = tested.dropna(subset=sources) if sources else tested
@@ -261,7 +267,7 @@ def run(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig) -> BacktestResult:
     result.calibration = pd.concat(cal_parts, ignore_index=True) if cal_parts else pd.DataFrame()
     if log_losses:
         result.log_loss = sum(ll * n for ll, n in log_losses) / sum(n for _, n in log_losses)
-    if dist_df.season.nunique() > 3:
+    if only is None and dist_df.season.nunique() > 3:
         result.dist_comparison = dist_select.summarize(dist_select.walk_forward(dist_df), cfg.distribution_metric)
     return result
 

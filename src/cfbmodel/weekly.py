@@ -59,7 +59,10 @@ def bet_card(con: duckdb.DuckDBPyConnection, season: int, week: int, params: dic
     Reference market: sharp fair line from 'bet' snapshots if captured, else the
     latest retail consensus. Each side is priced at every book in `books` that
     has a 'bet' line for the game (`cfb line set`), and the best EV is kept
-    (line shopping). With no book line, the side is priced at the reference line at -110.
+    (line shopping). A book with no 'bet' line but a current CFBD line (DraftKings
+    is a CFBD provider) is priced at that line, at -110 since CFBD carries no spread
+    prices. With no book line at all, the side is priced at the reference line at -110.
+    `status` marks games that are final or had started when the card was built.
     """
     rules = rules or StakingRules.from_settings()
     books = [b.lower() for b in (books if books is not None else default_books())]
@@ -78,6 +81,10 @@ def bet_card(con: duckdb.DuckDBPyConnection, season: int, week: int, params: dic
     ref = ref.set_index("game_id")
     bet_lines = latest_lines(con, "bet")
     bet_lines = bet_lines[bet_lines.provider.isin(books)]
+    cfbd_lines = latest_lines(con, "close", "cfbd:%")
+    cfbd_lines = cfbd_lines.assign(book=cfbd_lines.provider.str[5:].str.lower())
+    cfbd_lines = cfbd_lines[cfbd_lines.book.isin(books)]
+    now = pd.Timestamp.now(tz="UTC")
 
     rows = []
     for g in games.itertuples():
@@ -89,6 +96,10 @@ def bet_card(con: duckdb.DuckDBPyConnection, season: int, week: int, params: dic
         pmf = dist.pmf(M)
         offers = [(b.provider, float(b.home_spread), b.spread_price_home, b.spread_price_away)
                   for b in bet_lines[bet_lines.game_id == g.game_id].itertuples() if pd.notna(b.home_spread)]
+        manual = {o[0] for o in offers}
+        offers += [(f"{b.book} (CFBD line)", float(b.home_spread), None, None)
+                   for b in cfbd_lines[cfbd_lines.game_id == g.game_id].itertuples()
+                   if b.book not in manual and pd.notna(b.home_spread)]
         if not offers:
             offers = [("reference@-110", -mkt, -110, -110)]
         for side in ("home", "away"):
@@ -99,7 +110,9 @@ def bet_card(con: duckdb.DuckDBPyConnection, season: int, week: int, params: dic
                 quotes.append((price(pmf, side, home_line if side == "home" else -home_line, american), where))
             pr, where = max(quotes, key=lambda q: q[0].ev)
             rows.append({
-                "game_id": g.game_id, "game": f"{g.away_team} at {g.home_team}" if not g.neutral_site
+                "game_id": g.game_id, "status": "final" if pd.notna(g.home_points) else (
+                    "started" if pd.Timestamp(g.start_date) <= now else "upcoming"),
+                "game": f"{g.away_team} at {g.home_team}" if not g.neutral_site
                 else f"{g.away_team} vs {g.home_team} (N)", "kickoff": g.start_date,
                 "sources": ",".join(c for c in matrix.columns if pd.notna(matrix.loc[g.game_id, c]))
                 if g.game_id in matrix.index else "",

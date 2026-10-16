@@ -174,6 +174,20 @@ def backtest(distribution: str = typer.Option("best", help="normal | normal_line
     typer.echo(f"wrote {bt.write_report(result)}")
 
 
+@app.command()
+def record(season: int = typer.Option(...)):
+    """The season's running record: walk-forward paper picks and real logged bets, kept separate."""
+    from .record import season_record, write_record
+
+    rec = season_record(_con(), BacktestConfig.from_settings(), season)
+    for s in rec["strategies"]:
+        typer.echo(f"paper {s['market']:6s} @ {s['timing']:5s}: {s['w']}-{s['l']}-{s['p']}  units {s['units']:+.2f}  "
+                   f"CLV {s['clv_points'] if s['clv_points'] is not None else float('nan'):+.2f}")
+    typer.echo(f"real bets: {rec['real']['summary']}")
+    md, js = write_record(rec)
+    typer.echo(f"wrote {md} and {js}")
+
+
 @app.command("backtest-totals")
 def backtest_totals(distribution: str = typer.Option("best", help="normal | normal_linear_sigma | normal_shift | "
                                                      "frequency_weighted | best (by model.distribution_metric)")):
@@ -206,6 +220,7 @@ def week(season: int = typer.Option(...), week: int = typer.Option(...),
         typer.echo("no games with market lines for that week")
         raise typer.Exit(1)
     path = write_card(card, season, week)
+    card = card[card.status == "upcoming"]
     show = card if all_rows else card[card.stake_units > 0]
     cols = ["game", "side", "priced_at", "line", "price", "model_margin", "mkt_margin", "p_win", "p_push", "ev",
             "fair_odds", "stake_units"]

@@ -66,7 +66,7 @@ def test_key_number_models_beat_normal_on_spiky_data():
 def test_cover_losses_count_lines_and_prefer_the_true_spread():
     one = DiscretizedNormal()
     _, _, n = select.cover_losses(one, np.array([7.5, 7.0, -3.0]), np.array([10, -3, 1]))
-    # 7.5: lines -1.5..17.5 skipping -0.5 -> 20; 7.0: -1.5..16.5 -> 19; -3.0: -12.5..6.5 -> 19
+    # 7.5: lines -2.5..17.5 skipping -0.5 -> 20; 7.0: -2.5..16.5 -> 19; -3.0: -12.5..6.5 -> 19
     assert n.tolist() == [20, 19, 19]
 
     rng = np.random.default_rng(3)
@@ -124,6 +124,13 @@ def test_mixture_prices_continuously_between_market_lines():
     means = model.pmf_matrix(grid) @ SUPPORT
     assert np.all(np.diff(means) > 0) and np.diff(means).max() < 0.05
     np.testing.assert_allclose(model.pmf_matrix(-grid) @ SUPPORT, -means, atol=1e-9)
+
+
+def test_mixture_rows_sum_to_one_up_to_the_support_edge():
+    centers, m = synthetic(1500)
+    model = KeyNumberMixture().fit(centers, m)
+    edge = np.array([-79.99, -79.75, -79.5, 79.5, 79.75, 79.99])
+    np.testing.assert_allclose(model.pmf_matrix(edge).sum(axis=1), 1.0)
 
 
 def test_mixture_on_grid_is_the_plain_rebalance():

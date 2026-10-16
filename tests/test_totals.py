@@ -116,3 +116,32 @@ def test_early_clv_sign(league):
     bets = totals.simulate_total_bets(test, np.array([58.0]), dist, "early_total", cfg())
     assert bets.side.tolist() == ["over"] and bets.clv_points.tolist() == [2.0] and bets.clv_prob.iloc[0] > 0
     assert bets.result.tolist() == ["win"]
+
+
+def test_frequency_weighted_keeps_the_center_as_the_5050_point():
+    rng = np.random.default_rng(2)
+    centers = np.round(rng.normal(55, 9, 6000) * 2) / 2
+    tot = np.round(rng.normal(centers, 15))
+    tot[rng.random(len(tot)) < 0.1] = 45          # a lopsided spike would drag an uncentered row
+    m = totals.TotalFrequencyWeighted().fit(centers, tot)
+    for c in (41.5, 45.5, 55.5, 66.5):
+        p = m.pmf(c)
+        assert p[totals.T_SUPPORT < c].sum() == pytest.approx(0.5)
+    p = m.pmf(52.0)
+    assert p[totals.T_SUPPORT < 52].sum() == pytest.approx(p[totals.T_SUPPORT > 52].sum())
+    over = [totals.total_probs(m.pmf(c), "over", 50.5)[0] for c in np.linspace(48, 53, 101)]
+    assert np.all(np.diff(over) > 0)               # continuous and increasing between grid points
+
+
+def test_drift_is_netted_out_and_information_is_the_slope():
+    frame = pd.DataFrame({"season": [2024] * 4 + [2025] * 4,
+                          "early_total": [50.0] * 8,
+                          "mkt_total": [49.0, 49.0, 49.0, 49.0, 51.0, 51.0, 51.0, 51.0],
+                          "F": [50.0, 52.0, 48.0, 50.0, 50.0, 52.0, 48.0, 50.0]})
+    drift = totals.season_drift(frame)
+    assert drift.to_dict() == {2024: -1.0, 2025: 1.0}
+    bets = pd.DataFrame({"season": [2024, 2024, 2025], "side": ["under", "over", "under"],
+                         "clv_points": [1.0, -1.0, -1.0]})
+    assert totals.net_of_drift(bets, drift).tolist() == [0.0, 0.0, 0.0]   # pure drift, no skill
+    mv = totals.line_movement(pd.concat([frame] * 3, ignore_index=True)).set_index("season")
+    assert mv.loc["all", "slope"] == pytest.approx(0.0, abs=1e-9)          # the close ignored F

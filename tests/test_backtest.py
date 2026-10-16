@@ -100,3 +100,43 @@ def test_production_card_and_tracking(league, monkeypatch, tmp_path):
     b = league.execute("SELECT result, close_line, clv_points FROM bets WHERE bet_id = ?", [bet_id]).fetchone()
     assert b[0] in ("win", "loss", "push") and b[1] is not None
     assert tracking.summary(league)["settled"] == 1
+
+
+def test_season_record_is_walk_forward_and_separates_real_bets(league, tmp_path):
+    from cfbmodel import record
+
+    rec = record.season_record(league, cfg(), 2023)
+    picks = pd.DataFrame(rec["picks"])
+    assert len(picks) and set(picks.market) == {"spread"} and set(picks.timing) <= {"close", "early"}
+    assert (picks.profit.round(4).isin([0.9091, 0.0, -1.0])).all()
+    s = {(x["market"], x["timing"]): x for x in rec["strategies"]}
+    close = picks[picks.timing == "close"]
+    assert s[("spread", "close")]["bets"] == len(close)
+    assert s[("spread", "close")]["units"] == pytest.approx(close.profit.sum())
+    wk = pd.DataFrame(rec["weekly"]).query("market == 'spread' and timing == 'close'")
+    assert wk.cum_units.iloc[-1] == pytest.approx(close.profit.sum())
+    assert rec["real"]["summary"] == {"bets": 0}
+    # a real bet shows up only under real bets
+    gid = int(league.execute("SELECT min(game_id) FROM games WHERE season = 2023").fetchone()[0])
+    tracking.log_bet(league, gid, "home", -3.5, -110, 2.0, "draftkings", None, None)
+    rec2 = record.season_record(league, cfg(), 2023)
+    assert rec2["real"]["summary"]["bets"] == 1 and len(rec2["picks"]) == len(rec["picks"])
+    md, js = record.write_record(rec2, tmp_path / "record.md")
+    assert "Paper record" in md.read_text() and js.exists()
+
+
+def test_card_prices_a_books_cfbd_line(league, monkeypatch, tmp_path):
+    monkeypatch.setattr(weekly, "PARAMS_PATH", tmp_path / "p.json")
+    monkeypatch.setattr(weekly, "DIST_PATH", tmp_path / "d.json")
+    weekly.fit_production(league, cfg(), distribution="normal")
+    params, dist = weekly.load_production()
+    gid = int(league.execute("SELECT min(game_id) FROM games WHERE season = 2023 AND week = 12").fetchone()[0])
+    db.insert_df(league, "lines", pd.DataFrame([{"game_id": gid, "provider": "cfbd:DraftKings", "snapshot": "close",
+                                                 "home_spread": -2.5, "fetched_at": datetime.now(timezone.utc)}]))
+    card = weekly.bet_card(league, 2023, 12, params, dist, books=["draftkings"])
+    row = card[(card.game_id == gid) & (card.side == "home")].iloc[0]
+    assert (row.line, row.price, row.priced_at, row.status) == (-2.5, -110, "draftkings (CFBD line)", "final")
+    market.set_line(league, gid, "DraftKings", "bet", -3.0, -105, -115)      # a hand-entered line wins
+    card = weekly.bet_card(league, 2023, 12, params, dist, books=["draftkings"])
+    row = card[(card.game_id == gid) & (card.side == "home")].iloc[0]
+    assert (row.line, row.priced_at) == (-3.0, "draftkings")

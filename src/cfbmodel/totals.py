@@ -26,6 +26,7 @@ from .conventions import american_to_decimal
 from .db import log_exclusions, utcnow
 from .distribution import select as dist_select
 from .distribution.base import discretized_normal
+from .distribution.nfelo_mixture import grid_rebalance
 from .market import latest_lines
 
 T_MAX = 160
@@ -109,7 +110,12 @@ class TotalNormal(TotalDistribution):
 class TotalFrequencyWeighted(TotalDistribution):
     """Normal reweighted by how often each final total occurs (scores come in 3s and 7s, so
     some totals are more common than a normal says). Same fit as the margin
-    `sides_harvill_approx`: iterative proportional scaling with a pseudocount, sigma refit."""
+    `sides_harvill_approx`: iterative proportional scaling with a pseudocount, sigma refit.
+
+    The weights reshape mass but must not move it: unrecentered they pulled every total
+    toward the historical middle (+1.2 at 45.5, -0.6 at 65.5), a standing over/under lean
+    the model never chose. So each row is rebalanced to keep the center as its 50/50
+    point, as the margin mixture does."""
 
     name = "frequency_weighted"
 
@@ -120,7 +126,7 @@ class TotalFrequencyWeighted(TotalDistribution):
     def pmf_matrix(self, centers: np.ndarray) -> np.ndarray:
         centers = np.atleast_1d(np.asarray(centers, float))
         p = discretized_normal(centers, self.sigma, T_SUPPORT) * self.weights[None, :]
-        return p / p.sum(axis=1, keepdims=True)
+        return grid_rebalance(p / p.sum(axis=1, keepdims=True), centers, T_SUPPORT)
 
     def fit(self, centers: np.ndarray, totals: np.ndarray) -> "TotalFrequencyWeighted":
         centers, totals = np.asarray(centers, float), np.asarray(totals, float)
@@ -215,7 +221,8 @@ def distribution_frame(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig) -> p
 
 
 def totals_frame(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig) -> tuple[pd.DataFrame, list[str]]:
-    games = _with_totals(con, filter_games(con, _games(con, cfg.seasons), cfg, "totals_backtest"))
+    # Not logged: the spread backtest already logs the same filter for the same games every run.
+    games = _with_totals(con, filter_games(con, _games(con, cfg.seasons), cfg, "totals_backtest", log=False))
     close = consensus_total(con, "close")
     no_close = games[~games.game_id.isin(close.game_id)]
     log_exclusions(con, [{"game_id": r.game_id, "season": r.season, "week": r.week, "stage": "totals_backtest",
@@ -297,6 +304,42 @@ def calibration(test: pd.DataFrame, model_total: np.ndarray, dist: TotalDistribu
     return table.reset_index(), log_loss
 
 
+# ---------------------------------------------------------------- line movement
+
+
+def season_drift(frame: pd.DataFrame) -> pd.Series:
+    """Mean (close - early) per season: what always betting the under earns in CLV points."""
+    d = frame.dropna(subset=["early_total", "mkt_total"])
+    return (d.mkt_total - d.early_total).groupby(d.season).mean()
+
+
+def net_of_drift(bets: pd.DataFrame, drift: pd.Series) -> pd.Series:
+    """CLV minus what always taking the same side earned that season. Totals fall from the
+    early line to the close every season, so raw CLV flatters unders and understates overs."""
+    side = np.where(bets.side == "over", 1.0, -1.0)
+    return bets.clv_points - side * bets.season.map(drift).fillna(0.0).values
+
+
+def line_movement(frame: pd.DataFrame) -> pd.DataFrame:
+    """(close - early) regressed on (F - early) with an intercept, per season and pooled.
+    The intercept is the drift; the slope is information: how far the close moves toward
+    the sources per point of disagreement with the early line."""
+    d = frame.dropna(subset=["early_total", "mkt_total", "F"])
+    rows = []
+    for season, g in [*d.groupby("season"), ("all", d)]:
+        y, x = (g.mkt_total - g.early_total).values, (g.F - g.early_total).values
+        if len(g) < 10:
+            continue
+        X = np.column_stack([np.ones(len(x)), x])
+        coef, *_ = np.linalg.lstsq(X, y, rcond=None)
+        resid = y - X @ coef
+        cov = resid @ resid / (len(y) - 2) * np.linalg.inv(X.T @ X)
+        rows.append({"season": season, "n": len(g), "drift": float(y.mean()),
+                     "drift_se": float(y.std(ddof=1) / np.sqrt(len(y))), "intercept": float(coef[0]),
+                     "slope": float(coef[1]), "slope_se": float(np.sqrt(cov[1, 1]))})
+    return pd.DataFrame(rows)
+
+
 # ---------------------------------------------------------------- walk-forward run
 
 
@@ -315,6 +358,7 @@ class TotalsResult:
     dist_comparison: pd.DataFrame = field(default_factory=pd.DataFrame)
     dist_paired: pd.DataFrame = field(default_factory=pd.DataFrame)
     dist_frame_seasons: list[int] = field(default_factory=list)
+    movement: pd.DataFrame = field(default_factory=pd.DataFrame)
 
 
 def _alpha(f_train: pd.Series, mkt: np.ndarray, actual: np.ndarray, cfg: BacktestConfig) -> AlphaFit:
@@ -322,21 +366,24 @@ def _alpha(f_train: pd.Series, mkt: np.ndarray, actual: np.ndarray, cfg: Backtes
     return a if a.n >= 30 else AlphaFit(cfg.alpha_start, 1 - cfg.alpha_start, np.nan, np.nan, a.n)
 
 
-def run(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig) -> TotalsResult:
+def run(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig, only: list[int] | None = None) -> TotalsResult:
+    """Walk-forward over cfg.seasons; `only` restricts which test seasons are scored."""
     frame, sources = totals_frame(con, cfg)
     dist_df = distribution_frame(con, cfg)
     result = TotalsResult(cfg, sources, frame, dist_frame_seasons=sorted(dist_df.season.unique().tolist()))
     if frame.empty or dist_df.empty:
         return result
 
-    games_scores = walk_forward_games(dist_df)
-    result.dist_comparison = dist_select.summarize(dist_select.season_table(games_scores), cfg.distribution_metric)
-    result.dist_paired = dist_select.paired_se(games_scores, "cover_ll")
+    if only is None:
+        games_scores = walk_forward_games(dist_df)
+        result.dist_comparison = dist_select.summarize(dist_select.season_table(games_scores),
+                                                       cfg.distribution_metric)
+        result.dist_paired = dist_select.paired_se(games_scores, "cover_ll")
 
     seasons = sorted(frame.season.unique())
     combo_rows, cal_parts, log_losses, test_frames = [], [], [], []
     bet_parts = {"blend_close": [], "blend_early": []}
-    for s in seasons[cfg.min_train_seasons:]:
+    for s in [s for s in seasons[cfg.min_train_seasons:] if only is None or s in only]:
         train, test = frame[frame.season < s], frame[frame.season == s].copy()
         dtrain = dist_df[dist_df.season < s]
         name = cfg.distribution if cfg.distribution in REGISTRY else best_model(
@@ -366,12 +413,23 @@ def run(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig) -> TotalsResult:
             fc_train, fc_test = combine(train[cols], {c: 1.0 for c in cols}), combine(test[cols], {c: 1.0 for c in cols})
             ac = _alpha(fc_train, train.mkt_total.values, train.total.values, cfg)
             mc = np.where(fc_test.isna(), np.nan, ac.blend(test.mkt_total.values, fc_test.values))
+            ae = _alpha(fc_train, train.early_total.values, train.total.values, cfg)
+            me = np.where(fc_test.isna(), np.nan, ae.blend(test.early_total.values, fc_test.values))
+            early_bets = simulate_total_bets(test, me, dist, "early_total", cfg)
+            if len(early_bets):
+                early_bets["clv_net"] = net_of_drift(early_bets, season_drift(test))
+            early = ats_summary(early_bets)
             combo_rows.append({"combo": "+".join(combo), "season": s, "alpha": ac.alpha,
+                               "early_bets": early["bets"], "early_w": early["w"], "early_l": early["l"],
+                               "early_units": float(early_bets.profit.sum()) if len(early_bets) else 0.0,
+                               "early_clv_net_sum": float(early_bets.clv_net.sum()) if len(early_bets) else 0.0,
                                **{f"F_{k}": v for k, v in error_metrics(fc_test, test.total).items()},
                                **{f"M_{k}": v for k, v in error_metrics(pd.Series(mc, index=test.index),
                                                                         test.total).items()},
                                **ats_summary(simulate_total_bets(test, mc, dist, "mkt_total", cfg))})
 
+    if not test_frames:
+        return result
     tested = pd.concat(test_frames)
     result.frame = tested
     common = tested.dropna(subset=sources + ["early_total"]) if sources else tested
@@ -386,6 +444,9 @@ def run(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig) -> TotalsResult:
                    .reset_index())
     result.combos = pd.DataFrame(combo_rows)
     result.bets = {k: pd.concat(v, ignore_index=True) if v else pd.DataFrame() for k, v in bet_parts.items()}
+    result.movement = line_movement(tested)
+    if len(result.bets["blend_early"]):
+        result.bets["blend_early"]["clv_net"] = net_of_drift(result.bets["blend_early"], season_drift(tested))
     result.calibration = pd.concat(cal_parts, ignore_index=True) if cal_parts else pd.DataFrame()
     if log_losses:
         result.log_loss = sum(ll * n for ll, n in log_losses) / sum(n for _, n in log_losses)
@@ -417,14 +478,30 @@ def write_report(result: TotalsResult, path: Path | None = None) -> Path:
               "`common` = games with every source and an SP+ early O/U.\n", _md(result.errors),
               "## Mean error (actual - forecast) by season\n",
               "A standing bias here is an over/under lean the blend's alpha cannot remove (it has no intercept).\n",
-              _md(result.bias)]
+              _md(result.bias),
+              "## Line movement: drift vs information\n",
+              "`drift` = mean(close - early total): what always betting the under earns in CLV. `slope` = how far "
+              "the close moves toward the blended sources per point they disagree with the early line (fit with "
+              "an intercept, so drift is not counted as information). `clv_net` in the bet tables below is each "
+              "early bet's CLV minus what always taking that side earned that season.\n",
+              _md(result.movement)]
     if len(result.combos):
         pooled = result.combos.groupby("combo").agg(
             F_rmse=("F_rmse", "mean"), M_rmse=("M_rmse", "mean"), alpha=("alpha", "mean"), bets=("bets", "sum"),
             w=("w", "sum"), l=("l", "sum"), p=("p", "sum")).reset_index()
         pooled["win_pct"] = pooled.w / (pooled.w + pooled.l)
+        early = result.combos.groupby("combo").agg(
+            early_bets=("early_bets", "sum"), early_w=("early_w", "sum"), early_l=("early_l", "sum"),
+            early_units=("early_units", "sum"), clv_net_sum=("early_clv_net_sum", "sum")).reset_index()
+        early["early_win_pct"] = early.early_w / (early.early_w + early.early_l)
+        early["early_clv_net"] = early.clv_net_sum / early.early_bets.where(early.early_bets > 0)
         parts += ["## Source combinations (equal weights, alpha fit per season, bets vs close at -110)\n",
-                  _md(pooled)]
+                  _md(pooled),
+                  "### The same combinations at the early line\n",
+                  "SP+ alone is the timing-safe row: its projection and the early O/U come from the same sheet "
+                  "row. BCF Toys publish times are inferred (one hour before each week's first kickoff), so its "
+                  "projections are not proven to exist when the early O/U was posted.\n",
+                  _md(early.drop(columns="clv_net_sum"))]
     for name, bets in result.bets.items():
         parts += [f"## Simulated bets: {name}\n", _md(pd.DataFrame([ats_summary(bets)]))]
         if len(bets):
