@@ -21,7 +21,7 @@ uv run pytest
 |---|---|
 | 0 Scaffold | Done. DuckDB schema, sign-convention tests, `.env` handling, `cfb init-db`. |
 | 1 CFBD backfill | **Run** (2014–2026 minus 2020, about 25 calls). No line disagreed with `formattedSpread`. |
-| 2 Margin distribution | **Fit on 8,097 FBS games.** Normal (constant and linear sigma), a frequency-reweighted normal, and a key-number mixture, compared by walk-forward log-likelihood. |
+| 2 Margin distribution | **Fit on 8,097 FBS games.** Normal (constant and linear sigma), a frequency-reweighted normal, and a key-number mixture. Selected by walk-forward **cover log loss** on every half-point line within 10 points of the center (what is bet); exact-margin log-likelihood is reported alongside. nfelo_mixture wins. |
 | 3–4 Source adapters | **SP+ verified on real data** (see below); 2021–2026 ingested from the sheets' xlsx export. **BCF Toys 2022–2026 ingested**; every BCF final score agrees with CFBD. Massey is unit-tested on fixtures only. |
 | 5 Blend + backtest | **Run on 2022–2025** (SP+ and BCF). Walk-forward, point-in-time, every combo, alpha fit, calibration, ATS/ROI, CLV, reality-check block. |
 | 6 Weekly pipeline | Bet card works from the DB and line-shops the owner's books (FanDuel, DraftKings, Fanatics), keeping the best EV per side. Manual line entry works. The OddsPapi probe is not written: its API docs were not reachable. |
@@ -48,7 +48,9 @@ early-week spread and the sheet's own postgame scores:
   the paper can be read.
 - **nfelo mixture:** the structure follows the plan's description (normal + key-number
   components weighted by a super-gaussian, an opposite-sign lift, a 50/50 median
-  rebalance); all parameters are refit by maximum likelihood.
+  rebalance); all parameters are refit by maximum likelihood. The rebalance is exact at
+  market-line centers (integers, half points) and interpolated between them, so a
+  blended model margin prices continuously (7.01 no longer prices like 7.5).
 - **The Massey CSV** has not been seen; its parser logs anything it doesn't recognize.
 - **SP+ 2023** abbreviates the projected winner and the spread team ("GSU", "App. St. -5").
   Those rows are resolved from the full-name ATS pick and the spread diff; about 70 rows

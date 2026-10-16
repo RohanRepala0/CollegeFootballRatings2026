@@ -62,7 +62,16 @@ class KeyNumberMixture(MarginDistribution):
         opposite = (np.sign(signed)[None, :] * np.sign(centers)[:, None]) < 0
         weight = h[None, :] * sg * (1 + self.lam * opposite)                  # (n, 2k)
         p = drop_zero(p + weight @ comps)
-        return median_rebalance(p, centers) if self.rebalance else p
+        if not self.rebalance:
+            return p
+        # The rebalance puts the 50/50 point on a line, which is exact when the center is a
+        # market line (integer or half point). A blended model margin is rarely on that
+        # grid, so blend the rebalances at the two neighboring grid points by distance:
+        # unchanged on the grid, continuous between (otherwise every center in (7, 8)
+        # would price like 7.5).
+        lo = np.floor(centers * 2) / 2
+        w = ((centers - lo) / 0.5)[:, None]
+        return (1 - w) * median_rebalance(p, lo) + w * median_rebalance(p, lo + 0.5)
 
     def fit(self, centers: np.ndarray, margins: np.ndarray) -> "KeyNumberMixture":
         centers, idx = np.asarray(centers, float), margin_index(margins)

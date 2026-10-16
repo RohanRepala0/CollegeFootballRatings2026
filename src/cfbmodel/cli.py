@@ -163,7 +163,8 @@ def fit_distribution():
 
 
 @app.command()
-def backtest(distribution: str = typer.Option("best", help="normal | normal_linear_sigma | sides_harvill_approx | nfelo_mixture | best")):
+def backtest(distribution: str = typer.Option("best", help="normal | normal_linear_sigma | sides_harvill_approx | "
+                                              "nfelo_mixture | best (by model.distribution_metric)")):
     """Phase 5: walk-forward backtest and report."""
     from . import backtest as bt
 

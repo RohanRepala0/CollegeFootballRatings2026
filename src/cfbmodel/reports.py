@@ -23,16 +23,38 @@ def distribution_report(con, cfg: BacktestConfig, path: Path | None = None) -> P
     df = distribution_frame(con, cfg)
     if df.empty:
         raise RuntimeError("no games with closing lines; run `cfb backfill-cfbd` first")
-    wf = dist_select.walk_forward(df)
-    summary = dist_select.summarize(wf).reset_index()
+    metric = cfg.distribution_metric
+    fitted: dict = {}
+    games = dist_select.walk_forward_games(df, fitted=fitted)
+    wf = dist_select.season_table(games)
+    summary = dist_select.summarize(wf, metric).reset_index()
     models = {name: dist_select.make(name).fit(df.center.values, df.home_margin.values) for name in dist_select.REGISTRY}
     best = summary.model.iloc[0]
+    paired = pd.concat([dist_select.paired_se(games, "cover_ll").assign(metric="cover log loss (lower is better)"),
+                        dist_select.paired_se(games, "log_lik").assign(metric="exact-margin log-lik (higher is better)")])
+    per_season = wf.pivot(index="season", columns="model", values="cover_log_loss").reset_index()
 
     parts = [f"# Margin distribution, {utcnow():%Y-%m-%d}\n",
              f"Training data: {len(df)} FBS games with a CFBD retail-consensus close, seasons "
              f"{sorted(df.season.unique().tolist())}. Center = closing mkt_margin.\n",
-             "## Out-of-sample log-likelihood (walk-forward by season)\n", _md(summary),
-             "## Per-season detail\n", _md(wf), f"Selected: **{best}**.\n",
+             "## Out-of-sample scores (walk-forward by season)\n",
+             "- **Cover log loss** (`cover_log_loss`, `cover_brier`): for every half-point line within "
+             f"{dist_select.COVER_WINDOW:g} points of the center, the model's P(margin > line) scored against the "
+             "result. These are the alt-line cover probabilities the bet card prices. Lower is better.\n"
+             "- **Exact-margin log-likelihood** (`mean_log_lik`): probability of the exact final margin. "
+             "Higher is better. It rewards spikes at the right integers even when the cumulative cover "
+             "probabilities they imply are off.\n",
+             f"Ranked by **{metric}** (`model.distribution_metric` in config/settings.yaml).\n",
+             _md(summary),
+             "### Paired differences vs the best model (summed over games; SE across games)\n",
+             _md(paired.reset_index().rename(columns={"index": "model"})),
+             "### Cover log loss by season\n", _md(per_season),
+             f"Selected: **{best}**.\n",
+             "## Cover probability near key numbers (out of sample)\n",
+             "Games whose favorite is within 1 point of each key number. `fav_line` is the favorite's "
+             "spread; covering it means winning by the key number or more. Predictions are each season's "
+             "walk-forward fit.\n",
+             _md(dist_select.key_number_table(df, fitted)),
              "## Fitted parameters (all seasons)\n"]
     parts += [f"- `{n}`: {m.params()}\n" for n, m in models.items()]
 

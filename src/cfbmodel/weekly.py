@@ -29,8 +29,7 @@ def fit_production(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig, distribu
         raise RuntimeError("no games with closing lines; run `cfb backfill-cfbd` first")
     name = distribution
     if name == "best":
-        wf = dist_select.walk_forward(dist_df)
-        name = dist_select.summarize(wf).index[0] if len(wf) else "normal"
+        name = dist_select.best_model(dist_df, cfg.distribution_metric)
     dist = dist_select.make(name).fit(dist_df.center.values, dist_df.home_margin.values)
     dist_select.save(dist, DIST_PATH)
 
@@ -39,7 +38,7 @@ def fit_production(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig, distribu
     f = combine(frame[sources], weights) if sources else pd.Series(np.nan, index=frame.index)
     a = fit_alpha(f.values, frame.mkt_margin.values, frame.home_margin.values)
     alpha = a.alpha if a.n >= 30 else cfg.alpha_start
-    params = {"distribution": name, "weights": weights, "alpha": alpha, "beta": a.beta, "beta_se": a.beta_se,
+    params = {"distribution": name, "distribution_metric": cfg.distribution_metric, "weights": weights, "alpha": alpha, "beta": a.beta, "beta_se": a.beta_se,
               "alpha_n": a.n, "alpha_is_default": a.n < 30, "seasons": cfg.seasons}
     PARAMS_PATH.parent.mkdir(parents=True, exist_ok=True)
     PARAMS_PATH.write_text(json.dumps(params, indent=2, default=float))

@@ -38,7 +38,8 @@ class BacktestConfig:
     exclude_weeks_before: int = 0
     min_ev: float = 0.02
     american: float = -110
-    distribution: str = "best"          # a registry name, or "best" = highest walk-forward log-lik
+    distribution: str = "best"          # a registry name, or "best" = best walk-forward score
+    distribution_metric: str = "cover"  # "cover" (alt-line cover log loss) or "log_lik" (exact margin)
     alpha_start: float = 0.6
     min_train_seasons: int = 1
 
@@ -49,6 +50,7 @@ class BacktestConfig:
                    fbs_only=s["scope"]["fbs_only"], include_postseason=s["scope"]["include_postseason"],
                    exclude_weeks_before=s["scope"]["exclude_weeks_before"], min_ev=s["betting"]["min_ev"],
                    american=s["betting"]["default_price"], alpha_start=s["model"]["alpha_start"],
+                   distribution_metric=s["model"].get("distribution_metric", "cover"),
                    min_train_seasons=s["backtest"]["min_train_seasons"])
 
 
@@ -111,8 +113,7 @@ def pick_distribution(dist_df: pd.DataFrame, cfg: BacktestConfig, test_season: i
         raise RuntimeError(f"no distribution training data before {test_season}")
     name = cfg.distribution
     if name == "best":
-        wf = dist_select.walk_forward(train, min_train=max(1, train.season.nunique() - 2))
-        name = dist_select.summarize(wf).index[0] if len(wf) else "normal"
+        name = dist_select.best_model(train, cfg.distribution_metric, min_train=max(1, train.season.nunique() - 2))
     return dist_select.make(name).fit(train.center.values, train.home_margin.values)
 
 
@@ -261,7 +262,7 @@ def run(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig) -> BacktestResult:
     if log_losses:
         result.log_loss = sum(ll * n for ll, n in log_losses) / sum(n for _, n in log_losses)
     if dist_df.season.nunique() > 3:
-        result.dist_comparison = dist_select.summarize(dist_select.walk_forward(dist_df))
+        result.dist_comparison = dist_select.summarize(dist_select.walk_forward(dist_df), cfg.distribution_metric)
     return result
 
 
@@ -297,7 +298,8 @@ def write_report(result: BacktestResult, path: Path | None = None) -> Path:
              f"postseason: {cfg.include_postseason}; weeks < {cfg.exclude_weeks_before} dropped. "
              f"Min EV {cfg.min_ev:+.0%} at {cfg.american:+.0f}.\n"]
     if len(result.dist_comparison):
-        parts += ["## Margin distribution (walk-forward log-likelihood)\n", _md(result.dist_comparison.reset_index())]
+        parts += [f"## Margin distribution (walk-forward, ranked by {cfg.distribution_metric})\n",
+                  _md(result.dist_comparison.reset_index())]
     parts += ["## Per-season fitted parameters\n",
               _md(pd.DataFrame([{k: v for k, v in p.items() if k != "dist_params"} | {"weights": str(p["weights"])}
                                 for p in result.season_params])),
