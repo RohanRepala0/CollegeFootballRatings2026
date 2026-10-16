@@ -174,6 +174,17 @@ def backtest(distribution: str = typer.Option("best", help="normal | normal_line
     typer.echo(f"wrote {bt.write_report(result)}")
 
 
+@app.command("backtest-totals")
+def backtest_totals(distribution: str = typer.Option("best", help="normal | normal_linear_sigma | normal_shift | "
+                                                     "frequency_weighted | best (by model.distribution_metric)")):
+    """Totals (over/under): walk-forward backtest and report."""
+    from . import totals
+
+    cfg = BacktestConfig.from_settings()
+    cfg.distribution = distribution
+    typer.echo(f"wrote {totals.write_report(totals.run(_con(), cfg))}")
+
+
 @app.command()
 def fit(distribution: str = "best"):
     """Fit production parameters (distribution, weights, alpha) on all seasons."""

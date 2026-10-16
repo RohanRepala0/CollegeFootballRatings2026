@@ -402,6 +402,17 @@ def parse_week_rows(rows: list[list[str]], season: int, week: int | None, season
                 if not spread_ok:
                     issues.append({"tab": tab, "row": r, "issue": "spread_team_not_in_game", "text": cell("spread")})
                     spread_team, spread = None, None
+        total_line = parse_number(cell("total")) if cell("total") else None
+        proj_total = parse_score_total(cell("proj_score")) if cell("proj_score") else None
+        ou_diff = parse_number(cell("ou_diff")) if cell("ou_diff") else None
+        if total_line is not None and ou_diff is not None:
+            # O/U + O/U diff is the unrounded projected total; the score column is rounded per team.
+            implied = round(total_line + ou_diff, 1)
+            if proj_total is None or abs(implied - proj_total) <= 1.0 + 1e-9:
+                proj_total = implied
+            else:
+                issues.append({"tab": tab, "row": r, "issue": "ou_diff_disagrees_with_proj_score",
+                               "text": f"{cell('total')} {cell('ou_diff')} vs {cell('proj_score')}"})
         games.append(
             SheetGame(
                 season=season, week=week, season_type=season_type, tab=tab, row=r,
@@ -410,10 +421,10 @@ def parse_week_rows(rows: list[list[str]], season: int, week: int | None, season
                 proj_winner=winner,
                 proj_margin=proj_margin,
                 win_prob=parse_prob(cell("win_prob")) if cell("win_prob") else None,
-                proj_total=parse_score_total(cell("proj_score")) if cell("proj_score") else None,
+                proj_total=proj_total,
                 spread_team=spread_team, spread=spread,
                 ats_pick=ats,
-                total_line=parse_number(cell("total")) if cell("total") else None,
+                total_line=total_line,
             )
         )
     return SheetTab(games, ratings, issues)

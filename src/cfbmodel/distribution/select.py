@@ -28,8 +28,8 @@ def make(name: str) -> MarginDistribution:
 COVER_WINDOW = 10.0   # score every half-point line within this many points of the center
 
 
-def cover_losses(model: MarginDistribution, centers: np.ndarray, margins: np.ndarray,
-                 window: float = COVER_WINDOW) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+def cover_losses(model, centers: np.ndarray, margins: np.ndarray, window: float = COVER_WINDOW,
+                 support: np.ndarray = SUPPORT, skip: tuple[int, ...] = (0,)) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Per-game cover scores: (log-loss sum, Brier sum, number of lines scored).
 
     For every half-point line t within `window` of the game's center, the model's
@@ -37,14 +37,16 @@ def cover_losses(model: MarginDistribution, centers: np.ndarray, margins: np.nda
     probabilities the bet card prices (model margin != book line), so this ranks
     distributions by the thing that is bet, not by exact-margin likelihood. The
     line at -0.5 is skipped: with P(0) = 0 it is the same event as +0.5.
+    `support`/`skip` let the same score run on another integer outcome (game totals).
     """
     centers, margins = np.asarray(centers, float), np.asarray(margins, float)
     uniq, inv = np.unique(centers, return_inverse=True)
     surv = np.cumsum(model.pmf_matrix(uniq)[:, ::-1], axis=1)[:, ::-1]   # surv[:, j] = P(margin >= SUPPORT[j])
     offsets = np.arange(-int(window) - 1, int(window) + 2)
     j = np.floor(centers)[:, None] + offsets[None, :]                     # event: margin >= j, line j - 0.5
-    use = (np.abs(j - 0.5 - centers[:, None]) <= window) & (j != 0) & (j > SUPPORT[0]) & (j <= SUPPORT[-1])
-    col = np.clip(j, SUPPORT[0], SUPPORT[-1]).astype(int) - SUPPORT[0]
+    use = ((np.abs(j - 0.5 - centers[:, None]) <= window) & ~np.isin(j, skip)
+           & (j > support[0]) & (j <= support[-1]))
+    col = np.clip(j, support[0], support[-1]).astype(int) - support[0]
     p = np.clip(surv[inv[:, None], col], 1e-12, 1 - 1e-12)
     hit = margins[:, None] >= j
     ll = -np.where(hit, np.log(p), np.log1p(-p))
