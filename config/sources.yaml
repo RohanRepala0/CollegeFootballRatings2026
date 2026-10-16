@@ -1,0 +1,30 @@
+# External data sources (plan section 2). IDs come from DECISIONS.md D1-D3.
+
+cfbd:
+  base_url: https://api.collegefootballdata.com
+  # Seasons to backfill. The margin-distribution model wants as much clean
+  # history as possible (2014-2025 minus 2020); the rating-source backtest is 2021-2025.
+  seasons: [2014, 2015, 2016, 2017, 2018, 2019, 2021, 2022, 2023, 2024, 2025, 2026]
+  # Free tier is ~1,000 calls/month. `cfb status` reports the running count.
+  monthly_call_budget: 1000
+
+sp_plus:
+  2021: {type: sheet, id: 1q7T5HDF9Kp5SBpOqkDF_1dal3GYdPipaLSn75p2I-rg}
+  2022: {type: sheet, id: 1llrN8luL0XWuP8Y-Pb1NXKU84JhXLeUPafy1RfITEDw}
+  2023: {type: published, pub_id: 2PACX-1vRh9Slymcisd5-uEIvAD4zjGkJ7aeARseChhne-HdpyQeQiTSJeZD0WfyuG40O5S7Z20wz1XLYSUDUj}
+  2024: {type: sheet, id: 1CJImfkg0ouHIIIGOWRfbvwC0TNWh76n47xkz8nqrVBc}
+  2025: {type: sheet, id: 1a6hboWNnPeUzx5oUEjwJwf9vw4DuAV7lTaW4Q92Zpls}
+  2026: {type: sheet, id: 1vwoVl-Dxy0es87Z9I1RTvFzr72Lb1fAkREfbLxbK-eg}
+
+bcftoys:
+  url_template: https://bcftoys.com/{year}-gp
+  seasons: [2022, 2023, 2024, 2025, 2026]
+
+massey:
+  compare_url: https://masseyratings.com/cf/compare.htm
+  # Human polls and summary columns never enter the model (plan section 2.4).
+  exclude_systems: [AP, USA, CO, COA, Mean, Median, Med, StDev, Std, Avg]
+
+http:
+  user_agent: "cfbmodel/0.1 (personal research; contact via GitHub RohanRepala0)"
+  timeout_seconds: 30

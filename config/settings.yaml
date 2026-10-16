@@ -1,0 +1,25 @@
+# Defaults for the [OPEN] items in plan section 8. DECISIONS.md wins if it disagrees.
+
+model:
+  weights: fitted            # Q7: report equal and fitted, use fitted
+  alpha_start: 0.6           # Q8: reported alongside the fitted alpha
+  key_numbers: [3, 7, 10, 14, 17, 21, 24, 28]
+  margin_support: 80         # distributions live on integers [-80, 80], P(0) = 0
+
+betting:
+  kelly_fraction: 0.25       # Q9
+  max_bet_fraction: 0.02     # Q9: 2% of bankroll
+  min_ev: 0.02               # Q9: +2% EV per $1
+  bankroll_units: 100        # Q10: units, not dollars
+  default_price: -110
+
+scope:
+  fbs_only: true             # Q5
+  include_postseason: false  # Q6
+  exclude_weeks_before: 0    # set to 3 to drop weeks 0-2 (preseason priors dominate)
+
+backtest:
+  seasons: [2021, 2022, 2023, 2024, 2025]
+  holdout_season: 2026
+  distribution_seasons: [2014, 2015, 2016, 2017, 2018, 2019, 2021, 2022, 2023, 2024, 2025]
+  min_train_seasons: 1
