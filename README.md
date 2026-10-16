@@ -20,10 +20,10 @@ uv run pytest
 | Phase | State |
 |---|---|
 | 0 Scaffold | Done. DuckDB schema, sign-convention tests, `.env` handling, `cfb init-db`. |
-| 1 CFBD backfill | Code complete, **not run**: the build sandbox cannot reach api.collegefootballdata.com. Parser accepts v2 camelCase and v1 snake_case field names and checks every line's sign against `formattedSpread`. |
-| 2 Margin distribution | Code complete, tested on synthetic data only. Normal (constant and linear sigma), a frequency-reweighted normal, and a key-number mixture, compared by walk-forward log-likelihood. Needs CFBD history to fit. |
-| 3–4 Source adapters | **SP+ verified on real data** (see below). BCF Toys and Massey parsers are written from the plan's column lists and unit-tested on fixtures, but have not seen the real pages. |
-| 5 Blend + backtest | Code complete, tested end to end on a synthetic league. Walk-forward, point-in-time, every combo, alpha fit, calibration, ATS/ROI, CLV, reality-check block. |
+| 1 CFBD backfill | **Run** (2014–2026 minus 2020, about 25 calls). No line disagreed with `formattedSpread`. |
+| 2 Margin distribution | **Fit on 8,097 FBS games.** Normal (constant and linear sigma), a frequency-reweighted normal, and a key-number mixture, compared by walk-forward log-likelihood. |
+| 3–4 Source adapters | **SP+ verified on real data** (see below); 2021–2026 ingested from the sheets' xlsx export. **BCF Toys 2022–2026 ingested**; every BCF final score agrees with CFBD. Massey is unit-tested on fixtures only. |
+| 5 Blend + backtest | **Run on 2022–2025** (SP+ and BCF). Walk-forward, point-in-time, every combo, alpha fit, calibration, ATS/ROI, CLV, reality-check block. |
 | 6 Weekly pipeline | Bet card works from the DB and line-shops the owner's books (FanDuel, DraftKings, Fanatics), keeping the best EV per side. Manual line entry works. The OddsPapi probe is not written: its API docs were not reachable. |
 | 7 Tracking | `cfb log-bet`, `cfb settle` (close line, CLV in points and probability, result), summary. |
 
@@ -49,8 +49,10 @@ early-week spread and the sheet's own postgame scores:
 - **nfelo mixture:** the structure follows the plan's description (normal + key-number
   components weighted by a super-gaussian, an opposite-sign lift, a 50/50 median
   rebalance); all parameters are refit by maximum likelihood.
-- **CFBD field names, the BCF Toys HTML and the Massey CSV:** all were unreachable
-  while this was written; their parsers log anything they don't recognize.
+- **The Massey CSV** has not been seen; its parser logs anything it doesn't recognize.
+- **SP+ 2023** abbreviates the projected winner and the spread team ("GSU", "App. St. -5").
+  Those rows are resolved from the full-name ATS pick and the spread diff; about 70 rows
+  where that is ambiguous are dropped, never guessed.
 
 ### Findings that differ from the plan
 

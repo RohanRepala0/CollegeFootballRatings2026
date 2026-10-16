@@ -4,9 +4,9 @@ One table per week, newest first, built from FEI "as of the previous week", so
 the projections are point-in-time. Columns per the plan:
   Projected Win | Projected Loss | PW | PM | PF | PA | PT || Final | CL | CT || PE | SU | ATS | O/U
 
-The page itself could not be fetched while this was written, so the HTML
-walk is tolerant (any heading containing "Week N" followed by a table) and the
-header names drive the column map. Verify on the first real page.
+Checked on the real 2022-2026 pages: each section's heading is the first row of
+its table, 2022-2024 nest unclosed tables, and 2023 has an unnumbered
+"Conference Championship" section. The header names drive the column map.
 """
 
 from __future__ import annotations
@@ -62,45 +62,65 @@ def _num(text: str) -> float | None:
         return None
 
 
+def _heading(text: str, later_week: int | None) -> tuple[int | None, bool] | None:
+    """(week, postseason) for a section heading, else None. The page runs newest first, so an
+    unnumbered "Conference Championship" section is the week before the section above it."""
+    m = _WEEK.search(text)
+    if m:
+        return int(m.group(1)), False
+    if re.search(r"conference championship", text, re.I):
+        return (later_week - 1 if later_week else None), False
+    if _POST.search(text):
+        return None, True
+    return None
+
+
 def parse_page(html: str, season: int) -> tuple[list[BCFGame], list[dict]]:
+    """Walk the rows in page order. The real pages put each section's heading ("Week 7 Game
+    Projections") in the first row of its table, and 2022-2024 leave tables unclosed so they nest;
+    `find_all("tr")` still visits each row once. Headings outside tables are honored too."""
     soup = BeautifulSoup(html, "html.parser")
     games, issues = [], []
-    for table in soup.find_all("table"):
-        heading = table.find_previous(string=lambda s: s and (_WEEK.search(s) or _POST.search(s)))
-        if heading is None:
-            issues.append({"issue": "table_without_week_heading"})
+    section, cols, later_week, orphans = None, None, None, 0
+    for el in soup.find_all(["tr", "h1", "h2", "h3", "h4", "h5", "h6", "caption"]):
+        if el.name != "tr":
+            head = _heading(el.get_text(" ", strip=True), later_week)
+            if head is not None:
+                section, cols = head, None
+                later_week = head[0] if head[0] is not None else later_week
             continue
-        m = _WEEK.search(heading)
-        week = int(m.group(1)) if m else None
-        post = week is None and bool(_POST.search(heading))
-        rows = table.find_all("tr")
-        cols, start = None, 0
-        for i, tr in enumerate(rows):
-            cells = [c.get_text(" ", strip=True).lower() for c in tr.find_all(["th", "td"])]
-            mapped = [HEADERS.get(c) for c in cells]
-            if "winner" in mapped and "pm" in mapped:
-                cols = {k: mapped.index(k) for k in set(mapped) if k}
-                start = i + 1
-                unknown = [c for c, k in zip(cells, mapped) if c and not k]
-                if unknown:
-                    issues.append({"week": week, "issue": "unrecognized_headers", "headers": unknown})
-                break
-        if cols is None:
-            issues.append({"week": week, "issue": "no_header_row"})
+        cells = [c.get_text(" ", strip=True) for c in el.find_all(["th", "td"], recursive=False)]
+        if not cells:
             continue
-        for tr in rows[start:]:
-            cells = [c.get_text(" ", strip=True) for c in tr.find_all(["th", "td"])]
-            if len(cells) <= max(cols.values()):
-                continue
+        head = _heading(cells[0], later_week) if "projection" in cells[0].lower() else None
+        if head is not None:
+            section, cols = head, None
+            later_week = head[0] if head[0] is not None else later_week
+            continue
+        mapped = [HEADERS.get(c.lower()) for c in cells]
+        if "winner" in mapped and "pm" in mapped:
+            cols = {k: mapped.index(k) for k in set(mapped) if k}
+            unknown = [c for c, k in zip(cells, mapped) if c and not k]
+            if unknown:
+                issues.append({"week": section and section[0], "issue": "unrecognized_headers", "headers": unknown})
+            continue
+        if cols is None or len(cells) <= max(cols.values()):
+            continue
+        if section is None:
+            orphans += 1
+            continue
 
-            def get(k):
-                return cells[cols[k]] if k in cols else ""
+        def get(k):
+            return cells[cols[k]] if k in cols else ""
 
-            winner, loser = get("winner"), get("loser")
-            if not winner or not loser:
-                continue
-            games.append(BCFGame(season, week, post, winner, loser, _prob(get("pw")), _num(get("pm")),
-                                 _num(get("pt")), get("final") or None, _num(get("cl")), _num(get("ct"))))
+        winner, loser = get("winner"), get("loser")
+        if not winner or not loser:
+            continue
+        week, post = section
+        games.append(BCFGame(season, week, post, winner, loser, _prob(get("pw")), _num(get("pm")),
+                             _num(get("pt")), get("final") or None, _num(get("cl")), _num(get("ct"))))
+    if orphans:
+        issues.append({"issue": "rows_without_week_heading", "n": orphans})
     return games, issues
 
 

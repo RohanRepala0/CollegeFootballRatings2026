@@ -214,13 +214,20 @@ def run(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig) -> BacktestResult:
         if alpha.n < 30:
             alpha = AlphaFit(cfg.alpha_start, 1 - cfg.alpha_start, np.nan, np.nan, alpha.n)
         blended = np.where(f_test.isna(), np.nan, alpha.blend(test.mkt_margin.values, f_test.values))
+        # An early-week bet cannot see the close: blend with the early line, alpha fit against it.
+        alpha_early = fit_alpha(f_train.values, -train.early_home_spread.values, train.home_margin.values)
+        if alpha_early.n < 30:
+            alpha_early = AlphaFit(cfg.alpha_start, 1 - cfg.alpha_start, np.nan, np.nan, alpha_early.n)
+        blended_early = np.where(f_test.isna(), np.nan,
+                                 alpha_early.blend(-test.early_home_spread.values, f_test.values))
         test["F"], test["M"] = f_test.values, blended
         test_frames.append(test)
         result.season_params.append({"season": s, "distribution": dist.name, "dist_params": dist.params(),
                                      "weights": weights, "alpha": alpha.alpha, "beta": alpha.beta,
-                                     "beta_se": alpha.beta_se, "alpha_n": alpha.n})
+                                     "beta_se": alpha.beta_se, "alpha_n": alpha.n,
+                                     "alpha_early": alpha_early.alpha, "beta_early_se": alpha_early.beta_se})
         bet_parts["blend_close"].append(simulate_bets(test, blended, dist, "mkt_margin", cfg))
-        bet_parts["blend_early"].append(simulate_bets(test, blended, dist, "early_home_spread", cfg))
+        bet_parts["blend_early"].append(simulate_bets(test, blended_early, dist, "early_home_spread", cfg))
         cal_table, ll = calibration(test, blended, dist)
         cal_parts.append(cal_table.assign(season=s))
         if not np.isnan(ll):

@@ -126,3 +126,23 @@ def test_validation_from_db(con):
 def test_sheets_api_formatted_record():
     assert sp_plus.unmangle_pair("4/5/2024") == "4-5"
     assert sp_plus.unmangle_pair("23-19") == "23-19"
+
+
+def test_2023_abbreviated_winner_and_spread_resolved_from_ats_pick():
+    rows = [GAME_HDR,
+            ["2023-10-24", "19:00", "New Mexico State at Louisiana Tech", "NMSU", "3.5", "0.58", "31-27", "LT -3",
+             "New Mexico State", "6.5", "51.5", "Over", "6.8"],
+            ["2023-10-25", "19:00", "Jacksonville State at Florida International", "Jax State", "7.3", "0.66",
+             "29-21", "Jax State -8", "Florida International", "0.7", "44", "Over", "6.2"],
+            ["2023-10-26", "19:30", "Georgia State at Georgia Southern", "GSU", "2.1", "0.55", "31-29", "GS -2.5",
+             "Georgia State", "4.6", "62.5", "Under", "-2.4"],
+            ["2023-10-27", "19:30", "Florida Atlantic at Charlotte", "FAU", "6", "0.63", "26-20", "FAU -6",
+             "Charlotte", "0", "42", "Over", "3.9"]]
+    tab = sp_plus.parse_week_rows(rows, 2023, 9, "regular", "FBS week 9")
+    nmsu, jax, gsu, fau = tab.games
+    assert nmsu.margin_for("Louisiana Tech") == -3.5 and nmsu.spread_for("Louisiana Tech") == -3
+    assert jax.margin_for("Florida International") == -7.3 and jax.spread_for("Florida International") == 8
+    assert gsu.margin_for("Georgia Southern") == -2.1 and gsu.spread_for("Georgia Southern") == -2.5
+    # Model equals market (diff 0): either team could be "FAU", so nothing is guessed.
+    assert fau.margin_for("Charlotte") is None and fau.spread is None
+    assert [i["issue"] for i in tab.issues].count("resolved_from_ats_pick") == 3

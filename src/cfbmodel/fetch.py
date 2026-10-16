@@ -91,6 +91,7 @@ class Fetcher:
 
         fresh=True takes a new snapshot (once per run per URL); the old one stays on disk.
         """
+        params = {k: v for k, v in params.items() if v is not None} if params else None
         full = canonical_url(url, params)
         snap = self.cached(full)
         if snap is not None and (not fresh or full in self._fetched_this_run):

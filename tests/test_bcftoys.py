@@ -39,3 +39,30 @@ def test_parse_and_join(con):
     assert p.home_win_prob == 1 - 0.56
     assert r.lines[0].home_spread == -3.5             # Auburn +3.5 -> Georgia -3.5
     assert [i["issue"] for i in r.issues] == ["no_cfbd_game"]   # week 6 game not in CFBD fixture
+
+
+# The real pages: heading as the first row of each table, tables left unclosed (2022-2024),
+# and 2023's unnumbered conference championship section.
+REAL_HTML = """<html><body><table>
+<tr><td colspan=7>Week 15 Game Projections</td><td></td><td>Game Results</td><td></td><td>Projection Results</td></tr>
+<tr><td>Projected Win</td><td>Projected Loss</td><td>PW</td><td>PM</td><td>PF</td><td>PA</td><td>PT</td>
+<td></td><td>Final</td><td>CL</td><td>CT</td></tr>
+<tr><td>Army</td><td>Navy</td><td>.600</td><td>3.0</td><td>20</td><td>17</td><td>37</td><td></td><td>W 17-11</td>
+<td>-2.5</td><td>28.5</td></tr>
+<table>
+<tr><td colspan=7>Conference Championship Game Projections</td><td></td><td>Game Results</td></tr>
+<tr><td>Projected Win</td><td>Projected Loss</td><td>PW</td><td>PM</td></tr>
+<tr><td>Georgia</td><td>Alabama</td><td>.700</td><td>7.5</td></tr>
+<table>
+<tr><td colspan=7>Week 13 Game Projections</td></tr>
+<tr><td>Projected Win</td><td>Projected Loss</td><td>PW</td><td>PM</td></tr>
+<tr><td>Bowling Green</td><td>Akron</td><td>.800</td><td>12.0</td></tr>
+</body></html>"""
+
+
+def test_parse_real_layout():
+    parsed, issues = bcftoys.parse_page(REAL_HTML, 2023)
+    assert [(g.week, g.postseason, g.winner) for g in parsed] == [
+        (15, False, "Army"), (14, False, "Georgia"), (13, False, "Bowling Green")]
+    assert parsed[0].cl == -2.5 and parsed[1].pm == 7.5
+    assert issues == []
