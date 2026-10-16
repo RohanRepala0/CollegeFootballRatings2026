@@ -1,0 +1,197 @@
+"""Totals backtest on a synthetic league (made-up data, tests only)."""
+
+from datetime import datetime, timedelta, timezone
+
+import numpy as np
+import pandas as pd
+import pytest
+
+from cfbmodel import backtest as bt
+from cfbmodel import db, totals
+
+
+def test_total_probs_and_outcomes():
+    pmf = np.zeros(totals.T_MAX + 1)
+    pmf[[50, 51, 52]] = [0.25, 0.25, 0.5]
+    assert totals.total_probs(pmf, "over", 50.5) == pytest.approx((0.75, 0.0, 0.25))
+    assert totals.total_probs(pmf, "under", 51) == pytest.approx((0.25, 0.25, 0.5))
+    assert totals.total_outcome(52, "over", 51.5) == "win"
+    assert totals.total_outcome(52, "under", 51.5) == "loss"
+    assert totals.total_outcome(51, "over", 51) == "push"
+
+
+@pytest.mark.parametrize("name", list(totals.REGISTRY))
+def test_distributions_are_valid_and_fit(name):
+    rng = np.random.default_rng(0)
+    centers = np.round(rng.normal(55, 8, 4000) * 2) / 2
+    tot = np.clip(np.round(rng.normal(centers + 1.5, 14)), 0, None)
+    m = totals.make(name).fit(centers, tot)
+    p = m.pmf_matrix(np.array([30.5, 55.0, 80.5]))
+    assert p.shape == (3, totals.T_MAX + 1)
+    np.testing.assert_allclose(p.sum(axis=1), 1.0)
+    assert (p >= 0).all()
+    if name == "normal":
+        assert m.sigma0 == pytest.approx(14, abs=0.7)
+    if name == "normal_shift":
+        assert m.shift == pytest.approx(1.5, abs=0.7)
+
+
+def test_frequency_weights_find_common_totals():
+    rng = np.random.default_rng(1)
+    centers = np.round(rng.normal(55, 8, 6000) * 2) / 2
+    tot = np.round(rng.normal(centers, 14))
+    spike = rng.random(len(tot)) < 0.1
+    tot[spike] = 45
+    m = totals.TotalFrequencyWeighted().fit(centers, tot)
+    assert m.weights[45] > 1.5 * m.weights[44]
+
+
+@pytest.fixture
+def league(con):
+    rng = np.random.default_rng(11)
+    n_teams, seasons = 24, [2019, 2021, 2022, 2023]
+    db.upsert_df(con, "teams", pd.DataFrame([{"team_id": i, "school": f"T{i}", "abbreviation": None,
+                                              "conference": None, "classification": "fbs", "alternate_names": []}
+                                             for i in range(n_teams)]), "team_id")
+    games, lines, projs = [], [], []
+    gid = 0
+    for s in seasons:
+        for week in range(1, 13):
+            kickoff = datetime(s, 9, 1, 19, tzinfo=timezone.utc) + timedelta(weeks=week)
+            order = rng.permutation(n_teams)
+            for h, a in zip(order[::2], order[1::2]):
+                gid += 1
+                true_total = rng.normal(55, 8)
+                total = max(int(round(rng.normal(true_total, 14))), 3)
+                home = int(total // 2 + rng.integers(0, 2))
+                games.append({"game_id": gid, "season": s, "week": week, "season_type": "regular",
+                              "start_date": kickoff, "home_id": int(h), "away_id": int(a), "home_team": f"T{h}",
+                              "away_team": f"T{a}", "neutral_site": False, "home_division": "fbs",
+                              "away_division": "fbs", "home_points": home, "away_points": total - home})
+                close = round((true_total + rng.normal(0, 4)) * 2) / 2
+                early = close + rng.choice([-1.5, 0, 1.5])
+                for prov in ("A", "B"):
+                    lines.append({"game_id": gid, "provider": f"cfbd:{prov}", "snapshot": "close",
+                                  "home_spread": -3.0, "total": close, "fetched_at": kickoff})
+                lines.append({"game_id": gid, "provider": "sp_sheet", "snapshot": "early",
+                              "home_spread": -3.0, "total": early, "fetched_at": kickoff})
+                for src, noise in (("src_good", 2), ("src_bad", 9)):
+                    projs.append({"game_id": gid, "source": src, "exp_margin": 0.0,
+                                  "exp_total": true_total + rng.normal(0, noise), "includes_hfa": True,
+                                  "published_at": kickoff - timedelta(days=2),
+                                  "fetched_at": kickoff - timedelta(days=2)})
+    db.insert_df(con, "games", pd.DataFrame(games))
+    db.insert_df(con, "lines", pd.DataFrame(lines))
+    db.insert_df(con, "source_projections", pd.DataFrame(projs))
+    return con
+
+
+def cfg():
+    return bt.BacktestConfig(seasons=[2021, 2022, 2023], distribution_seasons=[2019, 2021, 2022, 2023],
+                             distribution="normal")
+
+
+def test_totals_backtest_runs_and_reports(league, tmp_path):
+    result = totals.run(league, cfg())
+    assert set(result.frame.season) == {2022, 2023}
+    assert set(result.sources) == {"src_good", "src_bad"}
+    w = eval(result.season_params[-1]["weights"])
+    assert w["src_good"] > w["src_bad"]
+    # src_good knows the true total better than the market: the blend leans on it
+    assert result.season_params[-1]["alpha"] < 0.8
+    errs = result.errors.set_index(["forecast", "sample"])
+    assert errs.loc[("src_good", "common"), "rmse"] < errs.loc[("market_close", "common"), "rmse"]
+    bets = result.bets["blend_close"]
+    assert len(bets) and set(bets.side) <= {"over", "under"} and (bets.clv_points == 0).all()
+    text = totals.write_report(result, tmp_path / "t.md").read_text()
+    assert "Totals backtest" in text and "Reality check" in text and "blend_early" in text
+
+
+def test_early_clv_sign(league):
+    """An over bet at an early total below the close gains line value."""
+    test = pd.DataFrame([{"game_id": 1, "season": 2023, "week": 1, "total": 60, "mkt_total": 52.5,
+                          "early_total": 50.5}])
+    dist = totals.make("normal")
+    dist.sigma0 = 14.0
+    bets = totals.simulate_total_bets(test, np.array([58.0]), dist, "early_total", cfg())
+    assert bets.side.tolist() == ["over"] and bets.clv_points.tolist() == [2.0] and bets.clv_prob.iloc[0] > 0
+    assert bets.result.tolist() == ["win"]
+
+
+def test_frequency_weighted_keeps_the_center_as_the_5050_point():
+    rng = np.random.default_rng(2)
+    centers = np.round(rng.normal(55, 9, 6000) * 2) / 2
+    tot = np.round(rng.normal(centers, 15))
+    tot[rng.random(len(tot)) < 0.1] = 45          # a lopsided spike would drag an uncentered row
+    m = totals.TotalFrequencyWeighted().fit(centers, tot)
+    for c in (41.5, 45.5, 55.5, 66.5):
+        p = m.pmf(c)
+        assert p[totals.T_SUPPORT < c].sum() == pytest.approx(0.5)
+    p = m.pmf(52.0)
+    assert p[totals.T_SUPPORT < 52].sum() == pytest.approx(p[totals.T_SUPPORT > 52].sum())
+    over = [totals.total_probs(m.pmf(c), "over", 50.5)[0] for c in np.linspace(48, 53, 101)]
+    assert np.all(np.diff(over) > 0)               # continuous and increasing between grid points
+
+
+def test_drift_is_netted_out_and_information_is_the_slope():
+    frame = pd.DataFrame({"season": [2024] * 4 + [2025] * 4,
+                          "early_total": [50.0] * 8,
+                          "mkt_total": [49.0, 49.0, 49.0, 49.0, 51.0, 51.0, 51.0, 51.0],
+                          "F": [50.0, 52.0, 48.0, 50.0, 50.0, 52.0, 48.0, 50.0]})
+    drift = totals.season_drift(frame)
+    assert drift.to_dict() == {2024: -1.0, 2025: 1.0}
+    bets = pd.DataFrame({"season": [2024, 2024, 2025], "side": ["under", "over", "under"],
+                         "clv_points": [1.0, -1.0, -1.0]})
+    assert totals.net_of_drift(bets, drift).tolist() == [0.0, 0.0, 0.0]   # pure drift, no skill
+    mv = totals.line_movement(pd.concat([frame] * 3, ignore_index=True)).set_index("season")
+    assert mv.loc["all", "slope"] == pytest.approx(0.0, abs=1e-9)          # the close ignored F
+
+
+def test_week_picks_use_the_records_fit(league):
+    from cfbmodel import record
+
+    wp = record.week_picks(league, cfg(), 2023, 12)
+    assert len(wp) == 12 and wp.pick.dtype == bool
+    res = totals.run(league, cfg(), only=[2023])
+    assert wp.alpha_early.iloc[0] == pytest.approx(res.season_params[0]["alpha_early"])
+    assert wp.distribution.iloc[0] == res.season_params[0]["distribution"]
+    r = wp.iloc[0]
+    dist = totals.make("normal").fit(*[totals.distribution_frame(league, cfg()).query("season < 2023")[c].values
+                                       for c in ("center", "total")])
+    w, p, l = totals.total_probs(dist.pmf(r.model_total), r.side, r.early_total)
+    assert r.ev == pytest.approx(w * (100 / 110) - l)
+
+
+def test_publish_week_folders_freeze_and_label(league, tmp_path, monkeypatch):
+    from cfbmodel import publish, weekly
+
+    monkeypatch.setattr(weekly, "PARAMS_PATH", tmp_path / "p.json")
+    monkeypatch.setattr(weekly, "DIST_PATH", tmp_path / "d.json")
+    weekly.fit_production(league, cfg(), distribution="normal")
+    kick = pd.Timestamp(league.execute("SELECT min(start_date) FROM games WHERE season = 2023 AND week = 12")
+                        .fetchone()[0]).tz_convert("UTC")
+
+    # written before kickoff: live bets, posted, graded once final
+    live = publish.publish_week(league, cfg(), 2023, 12, root=tmp_path, now=kick - pd.Timedelta(days=1))
+    bets = pd.read_csv(live / "bets.csv")
+    assert (live / "ratings.md").exists() and len(pd.read_csv(live / "ratings.csv")) == 12
+    assert len(bets) and (bets.status == "posted").all() and set(bets.market) <= {"total", "spread"}
+    assert bets.result.isin(["win", "loss", "push"]).all()          # synthetic games are already final
+    assert "before every signal's kickoff" in (live / "README.md").read_text()
+
+    # frozen: a re-run with different data later keeps the posted bets
+    league.execute("UPDATE lines SET total = total + 10 WHERE provider = 'sp_sheet'")
+    again = publish.publish_week(league, cfg(), 2023, 12, root=tmp_path)
+    pd.testing.assert_frame_equal(pd.read_csv(again / "bets.csv"), bets)
+    league.execute("UPDATE lines SET total = total - 10 WHERE provider = 'sp_sheet'")
+
+    # written after the games: retro signals from the record, and labeled so
+    past = publish.publish_week(league, cfg(), 2023, 11, root=tmp_path)
+    pb = pd.read_csv(past / "bets.csv")
+    assert len(pb) and (pb.status == "backfilled").all()
+    assert "after these games" in (past / "README.md").read_text()
+
+    index = publish.publish_season_index(league, 2023, root=tmp_path).read_text()
+    assert f"| Posted before kickoff | {len(bets)} |" in index
+    assert f"| Retro (generated after the games) | {len(pb)} |" in index
+    assert "[Week 11](week-11/)" in index and "[Week 12](week-12/)" in index

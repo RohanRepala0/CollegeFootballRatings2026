@@ -285,6 +285,8 @@ class SheetGame:
             return None
         if self.proj_margin == 0:
             return 0.0
+        if self.proj_winner is None:
+            return None
         return self.proj_margin if _same(team, self.proj_winner) else -self.proj_margin
 
     def spread_for(self, team: str) -> float | None:
@@ -295,6 +297,29 @@ class SheetGame:
 
 def _same(a: str | None, b: str | None) -> bool:
     return a is not None and b is not None and normalize(a) == normalize(b)
+
+
+def resolve_from_ats(team1: str, team2: str, winner: str | None, spread_team: str | None, spread: float | None,
+                     margin: float | None, pick: str | None, diff: float | None) -> tuple[str, str] | None:
+    """(winner, spread_team) as team1/team2 names, for rows that abbreviate them ('GSU', 'App. St. -5').
+
+    The full-name ATS pick and the spread diff (model minus market margin, from the pick's side) fix
+    both sides. `winner`/`spread_team` are passed only when already matched. None unless exactly one
+    reading fits.
+    """
+    if margin is None or spread is None or diff is None or pick is None:
+        return None
+    if not (_same(pick, team1) or _same(pick, team2)):
+        return None
+    fits = {}
+    for w in [winner] if winner else [team1, team2]:
+        for s in [spread_team] if spread_team else [team1, team2]:
+            model = margin if _same(w, pick) else -margin
+            market = -spread if _same(s, pick) else spread
+            if abs(model - market - diff) < 0.15:
+                key = (margin if _same(w, team1) else -margin, spread if _same(s, team1) else -spread)
+                fits[key] = (w, s)
+    return next(iter(fits.values())) if len(fits) == 1 else None
 
 
 @dataclass
@@ -353,30 +378,53 @@ def parse_week_rows(rows: list[list[str]], season: int, week: int | None, season
             issues.append({"tab": tab, "row": r, "issue": "unparsed_game", "text": game_text})
             continue
         team1, team2, neutral = parsed
+        proj_margin = parse_number(cell("proj_margin")) if cell("proj_margin") else None
+        ats = re.sub(r"\s+[+-]?\d+(?:\.\d+)?\s*$", "", cell("ats_pick")) or None
         winner = cell("proj_winner") or None
-        if winner is not None and not (_same(winner, team1) or _same(winner, team2)):
-            issues.append({"tab": tab, "row": r, "issue": "winner_not_in_game", "text": game_text, "winner": winner})
-            winner = None
+        winner_ok = winner is None or _same(winner, team1) or _same(winner, team2)
         spread_team, spread = parse_spread_cell(cell("spread"))
         if spread is not None and spread_team is None:
             issues.append({"tab": tab, "row": r, "issue": "bare_number_spread", "text": cell("spread")})
             spread = None
-        elif spread_team is not None and not (_same(spread_team, team1) or _same(spread_team, team2)):
-            issues.append({"tab": tab, "row": r, "issue": "spread_team_not_in_game", "text": cell("spread")})
-            spread_team, spread = None, None
-        ats = re.sub(r"\s+[+-]?\d+(?:\.\d+)?\s*$", "", cell("ats_pick")) or None
+        spread_ok = spread_team is None or _same(spread_team, team1) or _same(spread_team, team2)
+        if not (winner_ok and spread_ok):
+            fixed = resolve_from_ats(team1, team2, winner if winner_ok else None, spread_team if spread_ok else None,
+                                     spread, proj_margin, ats, parse_number(cell("spread_diff")))
+            if fixed is not None:
+                issues.append({"tab": tab, "row": r, "issue": "resolved_from_ats_pick", "text": game_text,
+                               "winner": winner, "spread": cell("spread"), "resolved": f"{fixed[0]} | {fixed[1]}"})
+                winner, spread_team = fixed
+            else:
+                if not winner_ok:
+                    issues.append({"tab": tab, "row": r, "issue": "winner_not_in_game", "text": game_text,
+                                   "winner": winner})
+                    winner = None
+                if not spread_ok:
+                    issues.append({"tab": tab, "row": r, "issue": "spread_team_not_in_game", "text": cell("spread")})
+                    spread_team, spread = None, None
+        total_line = parse_number(cell("total")) if cell("total") else None
+        proj_total = parse_score_total(cell("proj_score")) if cell("proj_score") else None
+        ou_diff = parse_number(cell("ou_diff")) if cell("ou_diff") else None
+        if total_line is not None and ou_diff is not None:
+            # O/U + O/U diff is the unrounded projected total; the score column is rounded per team.
+            implied = round(total_line + ou_diff, 1)
+            if proj_total is None or abs(implied - proj_total) <= 1.0 + 1e-9:
+                proj_total = implied
+            else:
+                issues.append({"tab": tab, "row": r, "issue": "ou_diff_disagrees_with_proj_score",
+                               "text": f"{cell('total')} {cell('ou_diff')} vs {cell('proj_score')}"})
         games.append(
             SheetGame(
                 season=season, week=week, season_type=season_type, tab=tab, row=r,
                 date=_parse_date(cell("date")) if cell("date") else None,
                 team1=team1, team2=team2, neutral=neutral,
                 proj_winner=winner,
-                proj_margin=parse_number(cell("proj_margin")) if cell("proj_margin") else None,
+                proj_margin=proj_margin,
                 win_prob=parse_prob(cell("win_prob")) if cell("win_prob") else None,
-                proj_total=parse_score_total(cell("proj_score")) if cell("proj_score") else None,
+                proj_total=proj_total,
                 spread_team=spread_team, spread=spread,
                 ats_pick=ats,
-                total_line=parse_number(cell("total")) if cell("total") else None,
+                total_line=total_line,
             )
         )
     return SheetTab(games, ratings, issues)
@@ -687,6 +735,14 @@ def discover_tabs(fetcher: Fetcher, season: int, google_api_key: str | None, ref
     cache.parent.mkdir(parents=True, exist_ok=True)
     cache.write_text(json.dumps(tabs, indent=2))
     return tabs
+
+
+def workbook_xlsx_url(season: int) -> str:
+    """The whole season workbook as .xlsx. Works without an API key for shared and published sheets."""
+    spec = config.sources()["sp_plus"][season]
+    if spec["type"] == "sheet":
+        return f"https://docs.google.com/spreadsheets/d/{spec['id']}/export?format=xlsx"
+    return f"https://docs.google.com/spreadsheets/d/e/{spec['pub_id']}/pub?output=xlsx"
 
 
 def tab_csv_url(season: int, gid: str) -> str:

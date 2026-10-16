@@ -38,7 +38,8 @@ class BacktestConfig:
     exclude_weeks_before: int = 0
     min_ev: float = 0.02
     american: float = -110
-    distribution: str = "best"          # a registry name, or "best" = highest walk-forward log-lik
+    distribution: str = "best"          # a registry name, or "best" = best walk-forward score
+    distribution_metric: str = "cover"  # "cover" (alt-line cover log loss) or "log_lik" (exact margin)
     alpha_start: float = 0.6
     min_train_seasons: int = 1
 
@@ -49,6 +50,7 @@ class BacktestConfig:
                    fbs_only=s["scope"]["fbs_only"], include_postseason=s["scope"]["include_postseason"],
                    exclude_weeks_before=s["scope"]["exclude_weeks_before"], min_ev=s["betting"]["min_ev"],
                    american=s["betting"]["default_price"], alpha_start=s["model"]["alpha_start"],
+                   distribution_metric=s["model"].get("distribution_metric", "cover"),
                    min_train_seasons=s["backtest"]["min_train_seasons"])
 
 
@@ -111,8 +113,7 @@ def pick_distribution(dist_df: pd.DataFrame, cfg: BacktestConfig, test_season: i
         raise RuntimeError(f"no distribution training data before {test_season}")
     name = cfg.distribution
     if name == "best":
-        wf = dist_select.walk_forward(train, min_train=max(1, train.season.nunique() - 2))
-        name = dist_select.summarize(wf).index[0] if len(wf) else "normal"
+        name = dist_select.best_model(train, cfg.distribution_metric, min_train=max(1, train.season.nunique() - 2))
     return dist_select.make(name).fit(train.center.values, train.home_margin.values)
 
 
@@ -142,13 +143,15 @@ def simulate_bets(test: pd.DataFrame, model_margin: np.ndarray, dist: MarginDist
 
 def ats_summary(bets: pd.DataFrame) -> dict:
     if bets.empty:
-        return {"bets": 0, "w": 0, "l": 0, "p": 0, "win_pct": np.nan, "roi": np.nan, "se": np.nan,
+        return {"bets": 0, "w": 0, "l": 0, "p": 0, "win_pct": np.nan, "win_se": np.nan, "roi": np.nan, "roi_se": np.nan,
                 "clv_points": np.nan, "clv_prob": np.nan}
     w, l, p = (bets.result == "win").sum(), (bets.result == "loss").sum(), (bets.result == "push").sum()
     n = w + l
     return {"bets": len(bets), "w": int(w), "l": int(l), "p": int(p), "win_pct": w / n if n else np.nan,
-            "roi": bets.profit.sum() / len(bets), "se": 0.5 / math.sqrt(n) if n else np.nan,
-            "clv_points": bets.clv_points.mean(), "clv_prob": bets.clv_prob.mean()}
+            "win_se": 0.5 / math.sqrt(n) if n else np.nan, "roi": bets.profit.sum() / len(bets),
+            "roi_se": float(bets.profit.std(ddof=1) / math.sqrt(len(bets))) if len(bets) > 1 else np.nan,
+            "clv_points": bets.clv_points.mean(), "clv_prob": bets.clv_prob.mean(),
+            **({"clv_net": bets.clv_net.mean()} if "clv_net" in bets else {})}
 
 
 def error_metrics(pred: pd.Series, actual: pd.Series) -> dict:
@@ -193,7 +196,9 @@ class BacktestResult:
     dist_comparison: pd.DataFrame = field(default_factory=pd.DataFrame)
 
 
-def run(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig) -> BacktestResult:
+def run(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig, only: list[int] | None = None) -> BacktestResult:
+    """Walk-forward over cfg.seasons; `only` restricts which test seasons are scored (and skips the
+    distribution comparison, which does not depend on it)."""
     frame, sources = backtest_frame(con, cfg)
     dist_df = distribution_frame(con, cfg)
     result = BacktestResult(cfg, sources, frame)
@@ -201,7 +206,7 @@ def run(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig) -> BacktestResult:
         return result
 
     seasons = sorted(frame.season.unique())
-    test_seasons = seasons[cfg.min_train_seasons:]
+    test_seasons = [s for s in seasons[cfg.min_train_seasons:] if only is None or s in only]
     combo_rows, err_rows, cal_parts, bet_parts = [], [], [], {"blend_close": [], "blend_early": []}
     test_frames, log_losses = [], []
     for s in test_seasons:
@@ -214,13 +219,20 @@ def run(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig) -> BacktestResult:
         if alpha.n < 30:
             alpha = AlphaFit(cfg.alpha_start, 1 - cfg.alpha_start, np.nan, np.nan, alpha.n)
         blended = np.where(f_test.isna(), np.nan, alpha.blend(test.mkt_margin.values, f_test.values))
+        # An early-week bet cannot see the close: blend with the early line, alpha fit against it.
+        alpha_early = fit_alpha(f_train.values, -train.early_home_spread.values, train.home_margin.values)
+        if alpha_early.n < 30:
+            alpha_early = AlphaFit(cfg.alpha_start, 1 - cfg.alpha_start, np.nan, np.nan, alpha_early.n)
+        blended_early = np.where(f_test.isna(), np.nan,
+                                 alpha_early.blend(-test.early_home_spread.values, f_test.values))
         test["F"], test["M"] = f_test.values, blended
         test_frames.append(test)
         result.season_params.append({"season": s, "distribution": dist.name, "dist_params": dist.params(),
                                      "weights": weights, "alpha": alpha.alpha, "beta": alpha.beta,
-                                     "beta_se": alpha.beta_se, "alpha_n": alpha.n})
+                                     "beta_se": alpha.beta_se, "alpha_n": alpha.n,
+                                     "alpha_early": alpha_early.alpha, "beta_early_se": alpha_early.beta_se})
         bet_parts["blend_close"].append(simulate_bets(test, blended, dist, "mkt_margin", cfg))
-        bet_parts["blend_early"].append(simulate_bets(test, blended, dist, "early_home_spread", cfg))
+        bet_parts["blend_early"].append(simulate_bets(test, blended_early, dist, "early_home_spread", cfg))
         cal_table, ll = calibration(test, blended, dist)
         cal_parts.append(cal_table.assign(season=s))
         if not np.isnan(ll):
@@ -241,6 +253,8 @@ def run(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig) -> BacktestResult:
                                                                         test.home_margin).items()},
                                **ats_summary(bets)})
 
+    if not test_frames:
+        return result
     tested = pd.concat(test_frames)
     result.frame = tested
     common = tested.dropna(subset=sources) if sources else tested
@@ -253,8 +267,8 @@ def run(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig) -> BacktestResult:
     result.calibration = pd.concat(cal_parts, ignore_index=True) if cal_parts else pd.DataFrame()
     if log_losses:
         result.log_loss = sum(ll * n for ll, n in log_losses) / sum(n for _, n in log_losses)
-    if dist_df.season.nunique() > 3:
-        result.dist_comparison = dist_select.summarize(dist_select.walk_forward(dist_df))
+    if only is None and dist_df.season.nunique() > 3:
+        result.dist_comparison = dist_select.summarize(dist_select.walk_forward(dist_df), cfg.distribution_metric)
     return result
 
 
@@ -290,7 +304,8 @@ def write_report(result: BacktestResult, path: Path | None = None) -> Path:
              f"postseason: {cfg.include_postseason}; weeks < {cfg.exclude_weeks_before} dropped. "
              f"Min EV {cfg.min_ev:+.0%} at {cfg.american:+.0f}.\n"]
     if len(result.dist_comparison):
-        parts += ["## Margin distribution (walk-forward log-likelihood)\n", _md(result.dist_comparison.reset_index())]
+        parts += [f"## Margin distribution (walk-forward, ranked by {cfg.distribution_metric})\n",
+                  _md(result.dist_comparison.reset_index())]
     parts += ["## Per-season fitted parameters\n",
               _md(pd.DataFrame([{k: v for k, v in p.items() if k != "dist_params"} | {"weights": str(p["weights"])}
                                 for p in result.season_params])),

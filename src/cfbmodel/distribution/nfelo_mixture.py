@@ -24,15 +24,25 @@ from .base import SUPPORT, MarginDistribution, discretized_normal, drop_zero, ma
 DEFAULT_KEYS = (3, 7, 10, 14, 17, 21, 24, 28)
 
 
-def median_rebalance(p: np.ndarray, centers: np.ndarray) -> np.ndarray:
-    below = SUPPORT[None, :] < centers[:, None]
-    above = SUPPORT[None, :] > centers[:, None]
+def median_rebalance(p: np.ndarray, centers: np.ndarray, support: np.ndarray = SUPPORT) -> np.ndarray:
+    below = support[None, :] < centers[:, None]
+    above = support[None, :] > centers[:, None]
     at = ~(below | above)
     L, U, A = (p * below).sum(1), (p * above).sum(1), (p * at).sum(1)
     target = (0.5 - A / 2)[:, None]
     a = target / np.maximum(L, 1e-12)[:, None]
     b = target / np.maximum(U, 1e-12)[:, None]
     return p * (below * a + above * b + at)
+
+
+def grid_rebalance(p: np.ndarray, centers: np.ndarray, support: np.ndarray = SUPPORT) -> np.ndarray:
+    """Make each center the 50/50 point. Exact at market-line centers (integers and half
+    points); a center between them blends the rebalances at the two neighboring grid
+    points by distance, so prices move continuously with the center."""
+    grid = np.clip(centers, support[0] + 0.5, support[-1] - 0.5)   # both grid points keep mass on each side
+    lo = np.floor(grid * 2) / 2
+    w = ((grid - lo) / 0.5)[:, None]
+    return (1 - w) * median_rebalance(p, lo, support) + w * median_rebalance(p, lo + 0.5, support)
 
 
 class KeyNumberMixture(MarginDistribution):
@@ -62,7 +72,11 @@ class KeyNumberMixture(MarginDistribution):
         opposite = (np.sign(signed)[None, :] * np.sign(centers)[:, None]) < 0
         weight = h[None, :] * sg * (1 + self.lam * opposite)                  # (n, 2k)
         p = drop_zero(p + weight @ comps)
-        return median_rebalance(p, centers) if self.rebalance else p
+        if not self.rebalance:
+            return p
+        # A blended model margin is rarely on the line grid; without the interpolation every
+        # center in (7, 8) would price like 7.5.
+        return grid_rebalance(p, centers)
 
     def fit(self, centers: np.ndarray, margins: np.ndarray) -> "KeyNumberMixture":
         centers, idx = np.asarray(centers, float), margin_index(margins)

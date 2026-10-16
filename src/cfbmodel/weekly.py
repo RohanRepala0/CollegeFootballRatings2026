@@ -29,8 +29,7 @@ def fit_production(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig, distribu
         raise RuntimeError("no games with closing lines; run `cfb backfill-cfbd` first")
     name = distribution
     if name == "best":
-        wf = dist_select.walk_forward(dist_df)
-        name = dist_select.summarize(wf).index[0] if len(wf) else "normal"
+        name = dist_select.best_model(dist_df, cfg.distribution_metric)
     dist = dist_select.make(name).fit(dist_df.center.values, dist_df.home_margin.values)
     dist_select.save(dist, DIST_PATH)
 
@@ -39,7 +38,7 @@ def fit_production(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig, distribu
     f = combine(frame[sources], weights) if sources else pd.Series(np.nan, index=frame.index)
     a = fit_alpha(f.values, frame.mkt_margin.values, frame.home_margin.values)
     alpha = a.alpha if a.n >= 30 else cfg.alpha_start
-    params = {"distribution": name, "weights": weights, "alpha": alpha, "beta": a.beta, "beta_se": a.beta_se,
+    params = {"distribution": name, "distribution_metric": cfg.distribution_metric, "weights": weights, "alpha": alpha, "beta": a.beta, "beta_se": a.beta_se,
               "alpha_n": a.n, "alpha_is_default": a.n < 30, "seasons": cfg.seasons}
     PARAMS_PATH.parent.mkdir(parents=True, exist_ok=True)
     PARAMS_PATH.write_text(json.dumps(params, indent=2, default=float))
@@ -60,7 +59,10 @@ def bet_card(con: duckdb.DuckDBPyConnection, season: int, week: int, params: dic
     Reference market: sharp fair line from 'bet' snapshots if captured, else the
     latest retail consensus. Each side is priced at every book in `books` that
     has a 'bet' line for the game (`cfb line set`), and the best EV is kept
-    (line shopping). With no book line, the side is priced at the reference line at -110.
+    (line shopping). A book with no 'bet' line but a current CFBD line (DraftKings
+    is a CFBD provider) is priced at that line, at -110 since CFBD carries no spread
+    prices. With no book line at all, the side is priced at the reference line at -110.
+    `status` marks games that are final or had started when the card was built.
     """
     rules = rules or StakingRules.from_settings()
     books = [b.lower() for b in (books if books is not None else default_books())]
@@ -79,6 +81,10 @@ def bet_card(con: duckdb.DuckDBPyConnection, season: int, week: int, params: dic
     ref = ref.set_index("game_id")
     bet_lines = latest_lines(con, "bet")
     bet_lines = bet_lines[bet_lines.provider.isin(books)]
+    cfbd_lines = latest_lines(con, "close", "cfbd:%")
+    cfbd_lines = cfbd_lines.assign(book=cfbd_lines.provider.str[5:].str.lower())
+    cfbd_lines = cfbd_lines[cfbd_lines.book.isin(books)]
+    now = pd.Timestamp.now(tz="UTC")
 
     rows = []
     for g in games.itertuples():
@@ -90,6 +96,10 @@ def bet_card(con: duckdb.DuckDBPyConnection, season: int, week: int, params: dic
         pmf = dist.pmf(M)
         offers = [(b.provider, float(b.home_spread), b.spread_price_home, b.spread_price_away)
                   for b in bet_lines[bet_lines.game_id == g.game_id].itertuples() if pd.notna(b.home_spread)]
+        manual = {o[0] for o in offers}
+        offers += [(f"{b.book} (CFBD line)", float(b.home_spread), None, None)
+                   for b in cfbd_lines[cfbd_lines.game_id == g.game_id].itertuples()
+                   if b.book not in manual and pd.notna(b.home_spread)]
         if not offers:
             offers = [("reference@-110", -mkt, -110, -110)]
         for side in ("home", "away"):
@@ -100,7 +110,9 @@ def bet_card(con: duckdb.DuckDBPyConnection, season: int, week: int, params: dic
                 quotes.append((price(pmf, side, home_line if side == "home" else -home_line, american), where))
             pr, where = max(quotes, key=lambda q: q[0].ev)
             rows.append({
-                "game_id": g.game_id, "game": f"{g.away_team} at {g.home_team}" if not g.neutral_site
+                "game_id": g.game_id, "status": "final" if pd.notna(g.home_points) else (
+                    "started" if pd.Timestamp(g.start_date) <= now else "upcoming"),
+                "game": f"{g.away_team} at {g.home_team}" if not g.neutral_site
                 else f"{g.away_team} vs {g.home_team} (N)", "kickoff": g.start_date,
                 "sources": ",".join(c for c in matrix.columns if pd.notna(matrix.loc[g.game_id, c]))
                 if g.game_id in matrix.index else "",

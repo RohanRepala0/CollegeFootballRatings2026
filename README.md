@@ -20,10 +20,11 @@ uv run pytest
 | Phase | State |
 |---|---|
 | 0 Scaffold | Done. DuckDB schema, sign-convention tests, `.env` handling, `cfb init-db`. |
-| 1 CFBD backfill | Code complete, **not run**: the build sandbox cannot reach api.collegefootballdata.com. Parser accepts v2 camelCase and v1 snake_case field names and checks every line's sign against `formattedSpread`. |
-| 2 Margin distribution | Code complete, tested on synthetic data only. Normal (constant and linear sigma), a frequency-reweighted normal, and a key-number mixture, compared by walk-forward log-likelihood. Needs CFBD history to fit. |
-| 3–4 Source adapters | **SP+ verified on real data** (see below). BCF Toys and Massey parsers are written from the plan's column lists and unit-tested on fixtures, but have not seen the real pages. |
-| 5 Blend + backtest | Code complete, tested end to end on a synthetic league. Walk-forward, point-in-time, every combo, alpha fit, calibration, ATS/ROI, CLV, reality-check block. |
+| 1 CFBD backfill | **Run** (2014–2026 minus 2020, about 25 calls). No line disagreed with `formattedSpread`. |
+| 2 Margin distribution | **Fit on 8,097 FBS games.** Normal (constant and linear sigma), a frequency-reweighted normal, and a key-number mixture. Selected by walk-forward **cover log loss** on every half-point line within 10 points of the center (what is bet); exact-margin log-likelihood is reported alongside. nfelo_mixture wins. |
+| 3–4 Source adapters | **SP+ verified on real data** (see below); 2021–2026 ingested from the sheets' xlsx export. **BCF Toys 2022–2026 ingested**; every BCF final score agrees with CFBD. Massey is unit-tested on fixtures only. |
+| 5 Blend + backtest | **Run on 2022–2025** (SP+ and BCF). Walk-forward, point-in-time, every combo, alpha fit, calibration, ATS/ROI, CLV, reality-check block. |
+| 5b Totals backtest | `cfb backtest-totals`: SP+ and BCF projected totals vs the CFBD consensus close and the SP+ sheet's early O/U, same walk-forward design, total-points distribution picked by cover log loss. |
 | 6 Weekly pipeline | Bet card works from the DB and line-shops the owner's books (FanDuel, DraftKings, Fanatics), keeping the best EV per side. Manual line entry works. The OddsPapi probe is not written: its API docs were not reachable. |
 | 7 Tracking | `cfb log-bet`, `cfb settle` (close line, CLV in points and probability, result), summary. |
 
@@ -48,9 +49,13 @@ early-week spread and the sheet's own postgame scores:
   the paper can be read.
 - **nfelo mixture:** the structure follows the plan's description (normal + key-number
   components weighted by a super-gaussian, an opposite-sign lift, a 50/50 median
-  rebalance); all parameters are refit by maximum likelihood.
-- **CFBD field names, the BCF Toys HTML and the Massey CSV:** all were unreachable
-  while this was written; their parsers log anything they don't recognize.
+  rebalance); all parameters are refit by maximum likelihood. The rebalance is exact at
+  market-line centers (integers, half points) and interpolated between them, so a
+  blended model margin prices continuously (7.01 no longer prices like 7.5).
+- **The Massey CSV** has not been seen; its parser logs anything it doesn't recognize.
+- **SP+ 2023** abbreviates the projected winner and the spread team ("GSU", "App. St. -5").
+  Those rows are resolved from the full-name ATS pick and the spread diff; about 70 rows
+  where that is ambiguous are dropped, never guessed.
 
 ### Findings that differ from the plan
 
@@ -74,12 +79,33 @@ cfb ingest-sp --season 2025 [--xlsx path | --live-week N]
 cfb ingest-bcf --season 2025
 cfb fit-distribution                      # Phase 2 report
 cfb backtest [--distribution best]        # Phase 5 report
+cfb backtest-totals                       # same walk-forward backtest for over/unders
+cfb record --season 2026                  # season record: walk-forward signals + real logged bets
+cfb picks --season 2026 --week 8           # this week's totals picks at the early O/U (the record's rule)
+cfb publish --season 2026 --week 8         # 2026/week-08/: ratings + actionable bets (frozen once written)
 cfb fit                                   # production weights, alpha, distribution
 cfb line set GAME_ID --book fanduel --spread -6.5 --price-home -110 --price-away -110
 cfb week --season 2026 --week 8           # shops FanDuel, DraftKings, Fanatics (config/settings.yaml)
 cfb log-bet GAME_ID --side home --line -6.5 --price -110 --stake 1 --book fanduel
 cfb settle
 cfb status                                # row counts, CFBD calls this month
+```
+
+## Weekly routine
+
+Ratings and bets are posted by week in [`2026/`](2026/README.md): each `week-NN/` folder has the week's
+actionable bets (`README.md`, `bets.csv`) and the model's ratings for every FBS game (`ratings.md`,
+`ratings.csv`). A week's bets are frozen once written; re-running only adds results. Weeks 1-6 are
+retro: generated after those games under the same rules.
+
+```bash
+uv run cfb backfill-cfbd --season 2026 --fresh   # scores and current lines (3 CFBD calls)
+uv run cfb ingest-sp --season 2026 --download    # SP+ sheet with the new week's tab (no Google key needed)
+uv run cfb ingest-bcf --season 2026 --fresh      # BCF Toys projections
+uv run cfb publish --season 2026 --week 8        # write 2026/week-08/ and update 2026/README.md
+git add 2026 && git commit -m "2026 week 8 picks" && git push   # the commit time shows it was posted before kickoff
+# after the games
+uv run cfb backfill-cfbd --season 2026 --fresh && uv run cfb publish --season 2026 --week 8   # adds results
 ```
 
 ## Conventions

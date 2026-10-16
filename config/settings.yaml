@@ -5,6 +5,8 @@ model:
   alpha_start: 0.6           # Q8: reported alongside the fitted alpha
   key_numbers: [3, 7, 10, 14, 17, 21, 24, 28]
   margin_support: 80         # distributions live on integers [-80, 80], P(0) = 0
+  distribution_metric: cover # pick the margin distribution by out-of-sample cover log loss on
+                             # nearby lines (what is bet); log_lik = exact-margin likelihood
 
 betting:
   kelly_fraction: 0.25       # Q9

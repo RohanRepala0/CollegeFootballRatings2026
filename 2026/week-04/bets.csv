@@ -1,0 +1,9 @@
+season,week,game_id,kickoff,game,rule,market,side,line,price,pick,model,ev,posted_at,status,final,result,units
+2026,4,401862779,2026-09-25 20:00:00+00:00,Army at Temple,"Totals, early number",total,over,49.5,-110.0,Over 49.5,,0.0290151284,2026-10-16T02:00:48.088126+00:00,backfilled,"Army 21, Temple 17",loss,-1.0
+2026,4,401858243,2026-09-26 16:00:00+00:00,Wake Forest at Louisville,"Totals, early number",total,under,58.5,-110.0,Under 58.5,,0.0382421118,2026-10-16T02:00:48.088126+00:00,backfilled,"Wake Forest 30, Louisville 27",win,0.9090909090909092
+2026,4,401860896,2026-09-26 16:00:00+00:00,Colorado State at UTSA,"Totals, early number",total,under,58.5,-110.0,Under 58.5,,0.0214521976,2026-10-16T02:00:48.088126+00:00,backfilled,"Colorado State 45, UTSA 59",loss,-1.0
+2026,4,401856700,2026-09-26 19:30:00+00:00,Oklahoma at Georgia,"Totals, early number",total,over,43.5,-110.0,Over 43.5,,0.0283511583,2026-10-16T02:00:48.088126+00:00,backfilled,"Oklahoma 13, Georgia 41",win,0.9090909090909092
+2026,4,401858463,2026-09-26 19:30:00+00:00,Iowa at Michigan,"Totals, early number",total,over,37.5,-110.0,Over 37.5,,0.0557710663,2026-10-16T02:00:48.088126+00:00,backfilled,"Iowa 20, Michigan 19",win,0.9090909090909092
+2026,4,401856881,2026-09-26 23:00:00+00:00,Oklahoma State at West Virginia,"Totals, early number",total,under,60.5,-110.0,Under 60.5,,0.030641129,2026-10-16T02:00:48.088126+00:00,backfilled,"Oklahoma State 41, West Virginia 24",loss,-1.0
+2026,4,401856703,2026-09-26 23:45:00+00:00,Missouri at Mississippi State,"Totals, early number",total,under,58.5,-110.0,Under 58.5,,0.025061876,2026-10-16T02:00:48.088126+00:00,backfilled,"Missouri 24, Mississippi State 31",win,0.9090909090909092
+2026,4,401860895,2026-09-27 01:00:00+00:00,Oregon State at UTEP,"Totals, early number",total,under,55.5,-110.0,Under 55.5,,0.0473570595,2026-10-16T02:00:48.088126+00:00,backfilled,"Oregon State 33, UTEP 7",win,0.9090909090909092

@@ -1,0 +1,8 @@
+season,week,game_id,kickoff,game,rule,market,side,line,price,pick,model,ev,posted_at,status,final,result,units
+2026,6,401862795,2026-10-10 16:00:00+00:00,Tulane at Army,"Totals, early number",total,over,45.5,-110.0,Over 45.5,,0.0263234352,2026-10-16T02:00:52.743972+00:00,backfilled,"Tulane 17, Army 20",loss,-1.0
+2026,6,401866440,2026-10-10 18:00:00+00:00,Miami (OH) at Massachusetts,"Totals, closing number",total,over,44.5,-110.0,Over 44.5,,0.0303569803,2026-10-16T02:00:52.743972+00:00,backfilled,"Miami (OH) 20, Massachusetts 19",loss,-1.0
+2026,6,401866437,2026-10-10 19:30:00+00:00,Buffalo at Toledo,"Totals, early number",total,under,55.5,-110.0,Under 55.5,,0.0515145918,2026-10-16T02:00:52.743972+00:00,backfilled,"Buffalo 23, Toledo 8",win,0.9090909090909092
+2026,6,401860902,2026-10-10 22:00:00+00:00,San Diego State at Oregon State,"Totals, early number",total,under,57.5,-110.0,Under 57.5,,0.021235452,2026-10-16T02:00:52.743972+00:00,backfilled,"San Diego State 14, Oregon State 66",loss,-1.0
+2026,6,401869943,2026-10-10 23:00:00+00:00,Coastal Carolina at Marshall,"Totals, early number",total,over,54.5,-110.0,Over 54.5,,0.0232726324,2026-10-16T02:00:52.743972+00:00,backfilled,"Coastal Carolina 27, Marshall 21",loss,-1.0
+2026,6,401864516,2026-10-10 23:30:00+00:00,Air Force at Northern Illinois,"Spreads, closing number",spread,away,-7.0,-110.0,Air Force −7,,0.0215523911,2026-10-16T02:00:52.743972+00:00,backfilled,"Air Force 28, Northern Illinois 7",win,0.9090909090909092
+2026,6,401864516,2026-10-10 23:30:00+00:00,Air Force at Northern Illinois,"Totals, early number",total,over,47.5,-110.0,Over 47.5,,0.0235176319,2026-10-16T02:00:52.743972+00:00,backfilled,"Air Force 28, Northern Illinois 7",loss,-1.0

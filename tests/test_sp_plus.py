@@ -20,7 +20,7 @@ def games_right_of_ratings():   # 2024 layout
     return [RATING_HDR + [""] + GAME_HDR,
             ["Georgia", "SEC", "4-0", "29.9", "1", "40", "1", "11", "1", "0.4", "4", "",
              "2024-09-28", "12:00", "Auburn at Georgia", "Georgia", "10.5", "0.77", "31-21", "Georgia -7.5",
-             "Georgia", "3", "48.5", "Over", "2"],
+             "Georgia", "3", "48.5", "Over", "3.5"],
             ["Auburn", "SEC", "2-2", "15.0", "20", "30", "40", "15", "15", "0.1", "50", "",
              "2024-09-28", "15:30", "Army vs. Navy", "Navy", "2.0", "0.55", "21-19", "Army -1.5",
              "Navy", "3.5", "39.5", "Over", "1"]]
@@ -126,3 +126,41 @@ def test_validation_from_db(con):
 def test_sheets_api_formatted_record():
     assert sp_plus.unmangle_pair("4/5/2024") == "4-5"
     assert sp_plus.unmangle_pair("23-19") == "23-19"
+
+
+def test_2023_abbreviated_winner_and_spread_resolved_from_ats_pick():
+    rows = [GAME_HDR,
+            ["2023-10-24", "19:00", "New Mexico State at Louisiana Tech", "NMSU", "3.5", "0.58", "31-27", "LT -3",
+             "New Mexico State", "6.5", "51.5", "Over", "6.8"],
+            ["2023-10-25", "19:00", "Jacksonville State at Florida International", "Jax State", "7.3", "0.66",
+             "29-21", "Jax State -8", "Florida International", "0.7", "44", "Over", "6.2"],
+            ["2023-10-26", "19:30", "Georgia State at Georgia Southern", "GSU", "2.1", "0.55", "31-29", "GS -2.5",
+             "Georgia State", "4.6", "62.5", "Under", "-2.4"],
+            ["2023-10-27", "19:30", "Florida Atlantic at Charlotte", "FAU", "6", "0.63", "26-20", "FAU -6",
+             "Charlotte", "0", "42", "Over", "3.9"]]
+    tab = sp_plus.parse_week_rows(rows, 2023, 9, "regular", "FBS week 9")
+    nmsu, jax, gsu, fau = tab.games
+    assert nmsu.margin_for("Louisiana Tech") == -3.5 and nmsu.spread_for("Louisiana Tech") == -3
+    assert jax.margin_for("Florida International") == -7.3 and jax.spread_for("Florida International") == 8
+    assert gsu.margin_for("Georgia Southern") == -2.1 and gsu.spread_for("Georgia Southern") == -2.5
+    # Model equals market (diff 0): either team could be "FAU", so nothing is guessed.
+    assert fau.margin_for("Charlotte") is None and fau.spread is None
+    assert [i["issue"] for i in tab.issues].count("resolved_from_ats_pick") == 3
+
+
+def test_projected_total_uses_ou_diff_when_consistent():
+    rows = [GAME_HDR,
+            ["2023-10-24", "19:00", "New Mexico State at Louisiana Tech", "New Mexico State", "3.5", "0.58", "31-27",
+             "Louisiana Tech -3", "New Mexico State", "6.5", "51.5", "Over", "6.8"],
+            ["2023-10-24", "19:30", "Liberty at Western Kentucky", "Liberty", "6.7", "0.65", "32-25",
+             "Liberty -3.5", "Liberty", "3.2", "61", "Under", "-4.6"],
+            ["2023-10-25", "19:00", "UTEP at Sam Houston", "Sam Houston", "2.7", "0.56", "23-20", "Sam Houston -3.5",
+             "UTEP", "0.8", "36", "Over", "9.9"]]
+    tab = sp_plus.parse_week_rows(rows, 2023, 9, "regular", "FBS week 9")
+    assert [g.proj_total for g in tab.games] == [58.3, 56.4, 43.0]   # last: 45.9 is > 1 from 43, keep rounded
+    assert [i["issue"] for i in tab.issues] == ["ou_diff_disagrees_with_proj_score"]
+
+
+def test_workbook_xlsx_url_needs_no_key():
+    assert sp_plus.workbook_xlsx_url(2026).endswith("/export?format=xlsx")
+    assert "/pub?output=xlsx" in sp_plus.workbook_xlsx_url(2023)     # 2023 is published-to-web

@@ -9,3 +9,4 @@ data/*.duckdb.wal
 data/models/
 reports/*.png
 reports/*.csv
+reports/*.json
