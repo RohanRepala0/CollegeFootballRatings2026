@@ -1,8 +1,8 @@
 # 2026 · Week 2
 
-Backfilled Thu Oct 15, 10:00 PM ET from the walk-forward paper record: these picks were made by the model's fixed rules with data from earlier seasons only, but they were **not posted before kickoff**.
+Signals generated Thu Oct 15, 10:00 PM ET, after these games, by the model's fixed rules using data from seasons before 2026 only.
 
-## Bets
+## Signals
 
 1 unit each. Totals at −110 at the early-week number from SP+'s sheet; spreads at the listed book's price.
 

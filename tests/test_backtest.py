@@ -122,7 +122,7 @@ def test_season_record_is_walk_forward_and_separates_real_bets(league, tmp_path)
     rec2 = record.season_record(league, cfg(), 2023)
     assert rec2["real"]["summary"]["bets"] == 1 and len(rec2["picks"]) == len(rec["picks"])
     md, js = record.write_record(rec2, tmp_path / "record.md")
-    assert "Paper record" in md.read_text() and js.exists()
+    assert "Signals by rule" in md.read_text() and js.exists()
 
 
 def test_card_prices_a_books_cfbd_line(league, monkeypatch, tmp_path):

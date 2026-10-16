@@ -1,10 +1,10 @@
 # 2026 record (2026-10-16)
 
-**Paper record**: the model's picks on this season's finished games, made walk-forward (fit on earlier seasons only, projections published before kickoff), graded at -110 for 1 unit. These are not wagers. **Real bets** are the `bets` table and are listed separately.
+**Signals**: the model's picks on this season's finished games, made walk-forward (fit on earlier seasons only, projections published before kickoff), graded at -110 for 1 unit. These are not wagers. **Real bets** are the `bets` table and are listed separately.
 
 Weeks with finals: [1, 2, 3, 4, 5, 6, 7].
 
-## Paper record by strategy
+## Signals by rule
 
 | market   | timing   |   bets |   w |   l |   p |   win_pct |   win_se |     roi |   roi_se |   clv_points |   clv_prob |   clv_net |   units |
 |:---------|:---------|-------:|----:|----:|----:|----------:|---------:|--------:|---------:|-------------:|-----------:|----------:|--------:|

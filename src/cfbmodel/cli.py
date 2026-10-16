@@ -181,12 +181,12 @@ def backtest(distribution: str = typer.Option("best", help="normal | normal_line
 
 @app.command()
 def record(season: int = typer.Option(...)):
-    """The season's running record: walk-forward paper picks and real logged bets, kept separate."""
+    """The season's running record: walk-forward signals and real logged bets, kept separate."""
     from .record import season_record, write_record
 
     rec = season_record(_con(), BacktestConfig.from_settings(), season)
     for s in rec["strategies"]:
-        typer.echo(f"paper {s['market']:6s} @ {s['timing']:5s}: {s['w']}-{s['l']}-{s['p']}  units {s['units']:+.2f}  "
+        typer.echo(f"signals {s['market']:6s} @ {s['timing']:5s}: {s['w']}-{s['l']}-{s['p']}  units {s['units']:+.2f}  "
                    f"CLV {s['clv_points'] if s['clv_points'] is not None else float('nan'):+.2f}")
     typer.echo(f"real bets: {rec['real']['summary']}")
     md, js = write_record(rec)
@@ -195,7 +195,7 @@ def record(season: int = typer.Option(...)):
 
 @app.command()
 def picks(season: int = typer.Option(...), week: int = typer.Option(...)):
-    """This week's totals paper picks at the early O/U (the record's headline rule)."""
+    """This week's totals signals at the early O/U (the record's headline rule)."""
     from .record import week_picks
 
     wp = week_picks(_con(), BacktestConfig.from_settings(), season, week)

@@ -9,13 +9,13 @@
 A week is written once. Its bets and ratings are then frozen: re-running only
 fills in final scores and results, so a posted pick can never be changed after
 the fact (and the git history shows when each week was committed). A bet written
-after its game kicked off is marked `backfilled`: those come from the walk-forward
-paper record and are never presented as posted before kickoff.
+after its game kicked off is marked `backfilled` (shown as "retro"): those come from the
+walk-forward record and are never presented as posted before kickoff.
 
 Rules. A live week posts the record's headline rule (totals at the early-week
 SP+-sheet O/U, `record.week_picks`) and any spread side that clears the EV bar at
-your books' current numbers (`weekly.bet_card`). A backfilled week posts the
-record's paper picks for that week (`record.season_record`). All bets are 1 unit;
+your books' current numbers (`weekly.bet_card`). A retro week posts the
+record's signals for that week (`record.season_record`). All signals are 1 unit;
 spreads at the book's price, totals at -110.
 """
 
@@ -129,7 +129,7 @@ def live_bets(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig, season: int, 
     return pd.DataFrame(rows)
 
 
-def paper_bets(rec: dict, week: int) -> pd.DataFrame:
+def retro_bets(rec: dict, week: int) -> pd.DataFrame:
     p = pd.DataFrame([x for x in rec["picks"] if x["week"] == week])
     if p.empty:
         return p
@@ -219,16 +219,15 @@ def _week_readme(bets: pd.DataFrame, rt: pd.DataFrame, season: int, week: int) -
     if len(bets):
         n_bf = int((bets.status == "backfilled").sum())
         if n_bf == len(bets):
-            parts.append(f"Backfilled {_et(posted)} from the walk-forward paper record: these picks were made by "
-                         "the model's fixed rules with data from earlier seasons only, but they were **not posted "
-                         "before kickoff**.\n")
+            parts.append(f"Signals generated {_et(posted)}, after these games, by the model's fixed rules using "
+                         f"data from seasons before {season} only.\n")
         elif n_bf:
-            parts.append(f"Posted {_et(posted)}. {n_bf} of {len(bets)} bets were written after their game kicked "
-                         "off and are marked backfilled.\n")
+            parts.append(f"Posted {_et(posted)}. {n_bf} of {len(bets)} signals were generated after their game "
+                         "kicked off.\n")
         else:
-            parts.append(f"Posted {_et(posted)}, before every bet's kickoff. Bets are frozen once posted; only "
-                         "results are added.\n")
-        parts += ["## Bets\n", "1 unit each. Totals at −110 at the early-week number from SP+'s sheet; spreads at "
+            parts.append(f"Posted {_et(posted)}, before every signal's kickoff. Signals are frozen once posted; "
+                         "only results are added.\n")
+        parts += ["## Signals\n", "1 unit each. Totals at −110 at the early-week number from SP+'s sheet; spreads at "
                   "the listed book's price.\n",
                   "| Kickoff | Game | Bet | Rule | Model | EV | Result |", "|---|---|---|---|---|---:|---|"]
         for b in bets.sort_values("kickoff").itertuples():
@@ -239,7 +238,7 @@ def _week_readme(bets: pd.DataFrame, rt: pd.DataFrame, season: int, week: int) -
                          f"{'—' if pd.isna(b.ev) else f'{b.ev:+.1%}'} | {res} |")
         parts.append(f"\n**Week:** {_record_line(bets)}\n")
     else:
-        parts.append("No bets this week: nothing cleared the +2% EV bar.\n")
+        parts.append("No signals this week: nothing cleared the +2% EV bar.\n")
     parts.append(f"## Ratings\n\nEvery game's line, model line and win probability: [ratings.md](ratings.md) · "
                  f"[ratings.csv](ratings.csv) ({len(rt)} games).\n")
     return "\n".join(parts)
@@ -270,9 +269,9 @@ def publish_week(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig, season: in
             raw = live_bets(con, cfg, season, week, params, dist)
             if len(raw):
                 raw = raw[pd.to_datetime(raw.kickoff, utc=True) > now]
-        else:                                               # the week is over: backfill from the paper record
+        else:                                               # the week is over: retro signals from the record
             rec = rec or season_record(con, cfg, season)
-            raw = paper_bets(rec, week)
+            raw = retro_bets(rec, week)
         bets = raw.copy()
         if len(bets):
             bets["kickoff"] = pd.to_datetime(bets.kickoff, utc=True)
@@ -309,20 +308,18 @@ def publish_season_index(con: duckdb.DuckDBPyConnection, season: int, root: Path
              "Weekly ratings and bets from SP+ and BCF Toys FEI projections blended with the betting market. Each "
              "week folder holds that week's actionable bets (README.md, bets.csv) and the model's ratings for every "
              "game (ratings.md, ratings.csv).\n",
-             "## Record\n", "| | Bets | Record |", "|---|---:|---|",
+             "## Record\n", "| | Signals | Record |", "|---|---:|---|",
              f"| Posted before kickoff | {len(posted)} | {_record_line(posted)} |",
-             f"| Backfilled paper picks | {len(backfilled)} | {_record_line(backfilled)} |",
+             f"| Retro (generated after the games) | {len(backfilled)} | {_record_line(backfilled)} |",
              f"| Real bets logged (`cfb log-bet`) | {len(real)} | {real_line} |",
-             "\nPosted bets are frozen when the week is written and graded at the price shown. Backfilled weeks were "
-             "generated after the games from the walk-forward paper record (fit on earlier seasons only) and were "
-             "not posted before kickoff. Closing-number picks are graded at the median line across books, which can "
-             "be a quarter point no book offered. Projection publish times are estimated (an hour before each week's "
-             "first kickoff), not recorded.\n",
-             "## Weeks\n", "| Week | Bets | Record | Status |", "|---|---:|---|---|"]
+             "\nPosted signals are frozen when the week is written and graded at the price shown. Retro weeks were "
+             "generated after those games under the same rules. Closing-number signals are graded at the median line "
+             "across books.\n",
+             "## Weeks\n", "| Week | Signals | Record | Status |", "|---|---:|---|---|"]
     for p in weeks:
         b = allb[allb.folder == p.parent.name]
-        status = ("backfilled" if len(b) and (b.status == "backfilled").all()
-                  else "posted" if len(b) else "no bets")
+        status = ("retro" if len(b) and (b.status == "backfilled").all()
+                  else "posted" if len(b) else "no signals")
         wk = int(p.parent.name.split("-")[1])
         parts.append(f"| [Week {wk}]({p.parent.name}/) | {len(b)} | {_record_line(b) if len(b) else '—'} | {status} |")
     parts += ["\n## Rules\n",
@@ -330,7 +327,7 @@ def publish_season_index(con: duckdb.DuckDBPyConnection, season: int, root: Path
               "when the expected value at −110 is at least +2%.",
               "- **Spreads, your book now**: bet a side at FanDuel, DraftKings or Fanatics when it clears +2% EV. "
               "The spread market already prices SP+ and FEI, so these are rare.",
-              "- Backfilled weeks also show the record's closing-number rules.",
+              "- Retro weeks also include the closing-number rules.",
               "- Model, backtests and caveats: see the repository README and `reports/`.\n"]
     path = sdir / "README.md"
     path.parent.mkdir(parents=True, exist_ok=True)

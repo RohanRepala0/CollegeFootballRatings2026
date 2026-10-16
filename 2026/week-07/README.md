@@ -1,8 +1,8 @@
 # 2026 · Week 7
 
-Posted Thu Oct 15, 10:00 PM ET, before every bet's kickoff. Bets are frozen once posted; only results are added.
+Posted Thu Oct 15, 10:00 PM ET, before every signal's kickoff. Signals are frozen once posted; only results are added.
 
-## Bets
+## Signals
 
 1 unit each. Totals at −110 at the early-week number from SP+'s sheet; spreads at the listed book's price.
 

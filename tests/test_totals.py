@@ -177,7 +177,7 @@ def test_publish_week_folders_freeze_and_label(league, tmp_path, monkeypatch):
     assert (live / "ratings.md").exists() and len(pd.read_csv(live / "ratings.csv")) == 12
     assert len(bets) and (bets.status == "posted").all() and set(bets.market) <= {"total", "spread"}
     assert bets.result.isin(["win", "loss", "push"]).all()          # synthetic games are already final
-    assert "before every bet's kickoff" in (live / "README.md").read_text()
+    assert "before every signal's kickoff" in (live / "README.md").read_text()
 
     # frozen: a re-run with different data later keeps the posted bets
     league.execute("UPDATE lines SET total = total + 10 WHERE provider = 'sp_sheet'")
@@ -185,13 +185,13 @@ def test_publish_week_folders_freeze_and_label(league, tmp_path, monkeypatch):
     pd.testing.assert_frame_equal(pd.read_csv(again / "bets.csv"), bets)
     league.execute("UPDATE lines SET total = total - 10 WHERE provider = 'sp_sheet'")
 
-    # written after the games: backfilled from the paper record, and labeled so
+    # written after the games: retro signals from the record, and labeled so
     past = publish.publish_week(league, cfg(), 2023, 11, root=tmp_path)
     pb = pd.read_csv(past / "bets.csv")
     assert len(pb) and (pb.status == "backfilled").all()
-    assert "not posted before kickoff" in (past / "README.md").read_text()
+    assert "after these games" in (past / "README.md").read_text()
 
     index = publish.publish_season_index(league, 2023, root=tmp_path).read_text()
     assert f"| Posted before kickoff | {len(bets)} |" in index
-    assert f"| Backfilled paper picks | {len(pb)} |" in index
+    assert f"| Retro (generated after the games) | {len(pb)} |" in index
     assert "[Week 11](week-11/)" in index and "[Week 12](week-12/)" in index

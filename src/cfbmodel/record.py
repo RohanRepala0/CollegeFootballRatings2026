@@ -1,6 +1,6 @@
-"""A season's running record: the model's paper picks, plus bets actually placed.
+"""A season's running record: the model's signals, plus bets actually placed.
 
-Paper picks are the walk-forward backtest scored on one season: distributions,
+Signals are the walk-forward backtest scored on one season: distributions,
 source weights and alphas are fit on earlier seasons only, and each game sees
 only projections published before kickoff. Each pick is graded at -110 for one
 unit. Spreads and totals are each priced against two lines: the closing
@@ -40,7 +40,7 @@ def _describe(r) -> str:
     return f"{team} {_fmt_line(r.line)}"
 
 
-def paper_picks(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig, season: int) -> pd.DataFrame:
+def season_signals(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig, season: int) -> pd.DataFrame:
     cfg = copy(cfg)
     cfg.seasons = sorted(set(cfg.seasons) | {season})
     games = con.execute("""SELECT game_id, week, start_date, home_team, away_team, neutral_site, home_points,
@@ -84,7 +84,7 @@ def _summary(b: pd.DataFrame) -> dict:
 
 
 def season_record(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig, season: int) -> dict:
-    picks = paper_picks(con, cfg, season)
+    picks = season_signals(con, cfg, season)
     weeks = sorted(con.execute("""SELECT DISTINCT week FROM games WHERE season = ? AND season_type = 'regular'
                                   AND home_points IS NOT NULL""", [season]).df().week.astype(int).tolist())
     strategies, weekly = [], []
@@ -121,11 +121,11 @@ def write_record(rec: dict, path: Path | None = None) -> tuple[Path, Path]:
     weekly = pd.DataFrame(rec["weekly"])
     picks = pd.DataFrame(rec["picks"])
     parts = [f"# {rec['season']} record ({utcnow():%Y-%m-%d})\n",
-             "**Paper record**: the model's picks on this season's finished games, made walk-forward (fit on "
+             "**Signals**: the model's picks on this season's finished games, made walk-forward (fit on "
              "earlier seasons only, projections published before kickoff), graded at -110 for 1 unit. "
              "These are not wagers. **Real bets** are the `bets` table and are listed separately.\n",
              f"Weeks with finals: {rec['weeks_final']}.\n",
-             "## Paper record by strategy\n", backtest._md(strat),
+             "## Signals by rule\n", backtest._md(strat),
              "## By week\n", backtest._md(weekly[["market", "timing", "week", "bets", "w", "l", "p", "units",
                                                     "cum_units", "clv_points"]])]
     if len(picks):
@@ -139,7 +139,7 @@ def write_record(rec: dict, path: Path | None = None) -> tuple[Path, Path]:
 
 
 def week_picks(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig, season: int, week: int) -> pd.DataFrame:
-    """This week's paper picks under the record's headline rule: totals at the early-week O/U
+    """This week's signals under the record's headline rule: totals at the early-week O/U
     from the SP+ sheet, with the distribution, source weights and early alpha fit on seasons
     before `season` (what `season_record` uses). Unplayed games included; `current_total` is
     the latest CFBD consensus, for reference only (picks are made and graded at the early O/U)."""

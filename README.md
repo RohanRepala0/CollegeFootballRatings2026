@@ -80,7 +80,7 @@ cfb ingest-bcf --season 2025
 cfb fit-distribution                      # Phase 2 report
 cfb backtest [--distribution best]        # Phase 5 report
 cfb backtest-totals                       # same walk-forward backtest for over/unders
-cfb record --season 2026                  # season record: walk-forward paper picks + real logged bets
+cfb record --season 2026                  # season record: walk-forward signals + real logged bets
 cfb picks --season 2026 --week 8           # this week's totals picks at the early O/U (the record's rule)
 cfb publish --season 2026 --week 8         # 2026/week-08/: ratings + actionable bets (frozen once written)
 cfb fit                                   # production weights, alpha, distribution
@@ -96,7 +96,7 @@ cfb status                                # row counts, CFBD calls this month
 Ratings and bets are posted by week in [`2026/`](2026/README.md): each `week-NN/` folder has the week's
 actionable bets (`README.md`, `bets.csv`) and the model's ratings for every FBS game (`ratings.md`,
 `ratings.csv`). A week's bets are frozen once written; re-running only adds results. Weeks 1-6 are
-backfilled from the walk-forward paper record and say so.
+retro: generated after those games under the same rules.
 
 ```bash
 uv run cfb backfill-cfbd --season 2026 --fresh   # scores and current lines (3 CFBD calls)
