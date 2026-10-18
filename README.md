@@ -9,13 +9,13 @@ distribution over final margins, so any line can be priced. The design is in
 ## How it works
 
 ```mermaid
-flowchart LR
+flowchart TB
     SRC["Sources<br/>SP+ sheets · BCF Toys FEI<br/>CFBD scores and lines"] --> LOG[("DuckDB log<br/>point in time")]
-    LOG --> MODEL["Model<br/>sources blended with the market<br/>→ full score distribution"]
+    LOG --> MODEL["Model<br/>sources blended<br/>with the market<br/>→ margin and total distributions"]
     MODEL --> SIG["Weekly signals<br/>totals at the early number<br/>spreads at your book"]
-    SIG --> POST["2026/week-NN/<br/>posted before kickoff"]
+    SIG --> POST["2026/week-NN/<br/>live weeks posted before kickoff<br/>past weeks labeled backtest"]
     POST --> GRADE["Graded on final scores<br/>record · line value · charts"]
-    GRADE -. "refit on past seasons only" .-> MODEL
+    GRADE -. "final scores join next season's fit" .-> MODEL
 ```
 
 The weekly signals and season record are in [`2026/`](2026/README.md). How the data moves from source to signal, with

@@ -1,5 +1,5 @@
 season,week,game_id,kickoff,game,rule,market,side,line,price,pick,model,ev,posted_at,status,final,result,units
-2026,7,401866441,2026-10-17 16:00:00+00:00,Ball State at Bowling Green,"Totals, early number",total,over,44.5,-110.0,Over 44.5,total 45.6,0.0294483416046204,2026-10-16T02:00:55.004783+00:00,posted,,,
-2026,7,401864522,2026-10-17 19:30:00+00:00,Northern Illinois at Wyoming,"Totals, early number",total,over,40.5,-110.0,Over 40.5,total 41.5,0.0421505421435034,2026-10-16T02:00:55.004783+00:00,posted,,,
-2026,7,401856726,2026-10-17 23:00:00+00:00,Arkansas at Vanderbilt,"Totals, early number",total,over,50.5,-110.0,Over 50.5,total 51.6,0.0275771282000953,2026-10-16T02:00:55.004783+00:00,posted,,,
-2026,7,401856722,2026-10-17 23:30:00+00:00,Kentucky at Oklahoma,"Totals, early number",total,over,43.5,-110.0,Over 43.5,total 44.5,0.0249829891129851,2026-10-16T02:00:55.004783+00:00,posted,,,
+2026,7,401866441,2026-10-17 16:00:00+00:00,Ball State at Bowling Green,"Totals, early number",total,over,44.5,-110.0,Over 44.5,total 45.6,0.0294483416046204,2026-10-16T02:00:55.004783+00:00,posted,"Ball State 32, Bowling Green 31",win,0.9090909090909092
+2026,7,401864522,2026-10-17 19:30:00+00:00,Northern Illinois at Wyoming,"Totals, early number",total,over,40.5,-110.0,Over 40.5,total 41.5,0.0421505421435034,2026-10-16T02:00:55.004783+00:00,posted,"Northern Illinois 23, Wyoming 41",win,0.9090909090909092
+2026,7,401856726,2026-10-17 23:00:00+00:00,Arkansas at Vanderbilt,"Totals, early number",total,over,50.5,-110.0,Over 50.5,total 51.6,0.0275771282000953,2026-10-16T02:00:55.004783+00:00,posted,"Arkansas 31, Vanderbilt 21",win,0.9090909090909092
+2026,7,401856722,2026-10-17 23:30:00+00:00,Kentucky at Oklahoma,"Totals, early number",total,over,43.5,-110.0,Over 43.5,total 44.5,0.0249829891129851,2026-10-16T02:00:55.004783+00:00,posted,"Kentucky 21, Oklahoma 13",loss,-1.0
