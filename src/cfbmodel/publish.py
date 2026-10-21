@@ -43,7 +43,8 @@ RULES = {
     ("spread", "book"): "Spreads, your book now",
 }
 BET_COLS = ["season", "week", "game_id", "kickoff", "game", "rule", "market", "side", "line", "price", "pick",
-            "model", "ev", "posted_at", "status", "final", "result", "units"]
+            "model", "ev", "now_book", "now_line", "now_ev", "posted_at", "status", "final", "result", "units"]
+BOOK_NAMES = {"draftkings": "DraftKings", "fanduel": "FanDuel", "fanatics": "Fanatics"}
 
 
 def week_dir(season: int, week: int, root: Path | None = None) -> Path:
@@ -117,7 +118,7 @@ def live_bets(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig, season: int, 
         rows.append({"game_id": r.game_id, "kickoff": g.start_date, "game": _game(g), "market": "total",
                      "timing": "early", "side": r.side, "line": r.early_total, "price": -110.0,
                      "pick": f"{r.side.title()} {r.early_total:g}", "model": f"total {r.model_total:.1f}",
-                     "ev": r.ev})
+                     "ev": r.ev, "now_book": r.now_book, "now_line": r.now_line, "now_ev": r.now_ev})
     card = bet_card(con, season, week, params, dist)
     for r in (card[(card.stake_units > 0) & (card.status == "upcoming")].itertuples() if len(card) else []):
         g = games.loc[r.game_id]
@@ -125,7 +126,7 @@ def live_bets(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig, season: int, 
         rows.append({"game_id": r.game_id, "kickoff": g.start_date, "game": _game(g), "market": "spread",
                      "timing": "book", "side": r.side, "line": r.line, "price": float(r.price),
                      "pick": f"{team} {_fmt_line(r.line)} ({r.priced_at})", "model": f"margin {r.model_margin:+.1f}",
-                     "ev": r.ev})
+                     "ev": r.ev, "now_book": r.priced_at, "now_line": r.line, "now_ev": r.ev})
     return pd.DataFrame(rows)
 
 
@@ -227,15 +228,26 @@ def _week_readme(bets: pd.DataFrame, rt: pd.DataFrame, season: int, week: int) -
         else:
             parts.append(f"Live: posted {_et(posted)}, before every signal's kickoff. Signals are frozen once "
                          "posted; only results are added.\n")
+        show_now = bets.now_ev.notna().any()
         parts += ["## Signals\n", "1 unit each. Totals at −110 at the early-week number from SP+'s sheet; spreads at "
-                  "the listed book's price.\n",
-                  "| Kickoff | Game | Bet | Rule | Model | EV | Result |", "|---|---|---|---|---|---:|---|"]
+                  "the listed book's price.\n"]
+        if show_now:
+            parts.append("**Now** is the best number at your books when this was posted (DraftKings is the only one "
+                         "of them CFBD carries, at −110) and the same bet's EV there. The record grades every signal "
+                         "at its listed number, but if Now is below +2%, the edge was already gone when this was posted.\n")
+        parts += [f"| Kickoff | Game | Bet | Rule | Model | EV |{' Now |' if show_now else ''} Result |",
+                  f"|---|---|---|---|---|---:|{'---|' if show_now else ''}---|"]
         for b in bets.sort_values("kickoff").itertuples():
             res = {"win": "✅ W", "loss": "❌ L", "push": "➖ P"}.get(b.result, "pending")
             res = f"{res} ({b.units:+.2f}) · {b.final}" if b.result else res
             model = b.model if isinstance(b.model, str) and b.model else "—"
+            now = ""
+            if show_now:
+                now = "—" if pd.isna(b.now_ev) else (
+                    f"{BOOK_NAMES.get(str(b.now_book).split(' ')[0], b.now_book)} {b.now_line:g} · {b.now_ev:+.1%}")
+                now = f" {now} |"
             parts.append(f"| {_et(b.kickoff)} | {b.game} | **{b.pick}** | {b.rule} | {model} | "
-                         f"{'—' if pd.isna(b.ev) else f'{b.ev:+.1%}'} | {res} |")
+                         f"{'—' if pd.isna(b.ev) else f'{b.ev:+.1%}'} |{now} {res} |")
         parts.append(f"\n**Week:** {_record_line(bets)}\n")
     else:
         parts.append("No signals this week: nothing cleared the +2% EV bar.\n")

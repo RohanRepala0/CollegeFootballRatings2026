@@ -197,3 +197,39 @@ def test_publish_week_folders_freeze_and_label(league, tmp_path, monkeypatch):
     assert (tmp_path / "2023" / "charts" / "cumulative-dark.png").exists() and "<picture>" in index
     assert (tmp_path / "2023" / "charts" / "backtest-light.png").exists() and "## Backtest, 2022–2022" in index
     assert "[Week 11](week-11/)" in index and "[Week 12](week-12/)" in index
+
+
+def test_week_picks_price_the_same_side_at_your_books_now(league):
+    from cfbmodel import market, record
+
+    wp = record.week_picks(league, cfg(), 2023, 12)
+    assert wp.now_line.isna().all()                       # no provider in the fixture is one of your books
+    gid = int(wp.game_id.iloc[0])
+    side = wp.side.iloc[0]
+    for book, total in (("DraftKings", 40.5), ("FanDuel", 44.5), ("Bovada", 30.5)):
+        league.execute("INSERT INTO lines VALUES (?, ?, 'close', NULL, NULL, NULL, ?, now())",
+                       [gid, f"cfbd:{book}", total])
+    r = record.week_picks(league, cfg(), 2023, 12).set_index("game_id").loc[gid]
+    # Bovada is not one of your books; the best of DraftKings/FanDuel for the side wins
+    assert (r.now_book, r.now_line) == (("draftkings", 40.5) if side == "over" else ("fanduel", 44.5))
+    assert r.side == side and r.early_total != r.now_line and -1 < r.now_ev < 1
+    assert r.now_ev != pytest.approx(r.ev)                 # priced at the new number, not the early one
+
+
+def test_published_week_shows_now_column(league, tmp_path, monkeypatch):
+    from cfbmodel import publish, weekly
+
+    monkeypatch.setattr(weekly, "PARAMS_PATH", tmp_path / "p.json")
+    monkeypatch.setattr(weekly, "DIST_PATH", tmp_path / "d.json")
+    weekly.fit_production(league, cfg(), distribution="normal")
+    for gid in league.execute("SELECT game_id FROM games WHERE season = 2023 AND week = 12").df().game_id:
+        league.execute("INSERT INTO lines VALUES (?, 'cfbd:DraftKings', 'close', NULL, NULL, NULL, 47.5, now())",
+                       [int(gid)])
+    kick = pd.Timestamp(league.execute("SELECT min(start_date) FROM games WHERE season = 2023 AND week = 12")
+                        .fetchone()[0]).tz_convert("UTC")
+    out = publish.publish_week(league, cfg(), 2023, 12, root=tmp_path, now=kick - pd.Timedelta(days=1))
+    bets = pd.read_csv(out / "bets.csv")
+    totals_rows = bets[bets.market == "total"]
+    assert len(totals_rows) and (totals_rows.now_line == 47.5).all() and (totals_rows.now_book == "draftkings").all()
+    text = (out / "README.md").read_text()
+    assert "| Now |" in text and "DraftKings 47.5 · " in text

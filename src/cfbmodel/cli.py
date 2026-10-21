@@ -205,7 +205,7 @@ def picks(season: int = typer.Option(...), week: int = typer.Option(...)):
     path = config.REPORTS_DIR / f"totals_picks_{season}_w{week:02d}.csv"
     wp.to_csv(path, index=False)
     show = wp[wp.pick]
-    cols = ["away_team", "home_team", "early_total", "current_total", "F", "model_total", "side", "ev", "p_win"]
+    cols = ["away_team", "home_team", "early_total", "F", "model_total", "side", "ev", "now_book", "now_line", "now_ev"]
     typer.echo(show[cols].round(3).to_string(index=False) if len(show) else "no total clears the EV bar")
     typer.echo(f"\nall games: {path}")
 
