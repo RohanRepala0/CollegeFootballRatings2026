@@ -142,8 +142,15 @@ def week_picks(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig, season: int,
     """This week's signals under the record's headline rule: totals at the early-week O/U
     from the SP+ sheet, with the distribution, source weights and early alpha fit on seasons
     before `season` (what `season_record` uses). Unplayed games included; `current_total` is
-    the latest CFBD consensus, for reference only (picks are made and graded at the early O/U)."""
+    the latest CFBD consensus, for reference only (picks are made and graded at the early O/U).
+
+    `now_book` / `now_line` / `now_ev` price the same side at the best current total among
+    your books that CFBD carries (DraftKings), at -110, blended with the alpha fit against
+    the closing total. They say whether the signal is still there to bet; the record keeps
+    grading at the early O/U."""
     from .blend import combine, fit_weights, point_in_time_projections
+    from .market import latest_lines
+    from .weekly import default_books
 
     cfg = copy(cfg)
     cfg.seasons = [s for s in cfg.seasons if s < season]
@@ -154,7 +161,13 @@ def week_picks(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig, season: int,
         dtrain, cfg.distribution_metric, min_train=max(1, dtrain.season.nunique() - 2))
     dist = totals.make(name).fit(dtrain.center.values, dtrain.total.values)
     weights = fit_weights(frame[sources], frame.total)
-    a_early = totals._alpha(combine(frame[sources], weights), frame.early_total.values, frame.total.values, cfg)
+    f_train = combine(frame[sources], weights)
+    a_early = totals._alpha(f_train, frame.early_total.values, frame.total.values, cfg)
+    a_close = totals._alpha(f_train, frame.mkt_total.values, frame.total.values, cfg)
+    books = {b.lower() for b in default_books()}
+    now_lines = latest_lines(con, "close", "cfbd:%").dropna(subset=["total"])
+    now_lines = now_lines.assign(book=now_lines.provider.str[5:].str.lower())
+    now_lines = now_lines[now_lines.book.isin(books)]
 
     games = con.execute("""SELECT * FROM games WHERE season = ? AND week = ? AND season_type = 'regular'
                            AND home_division = 'fbs' AND away_division = 'fbs'""", [season, week]).df()
@@ -178,11 +191,20 @@ def week_picks(con: duckdb.DuckDBPyConnection, cfg: BacktestConfig, season: int,
             w, p, l = totals.total_probs(pmf, side, g.early_total)
             quotes.append((w * payout - l, side, w, p))
         ev, side, p_win, p_push = max(quotes)
+        now_book, now_line, now_ev = None, None, None
+        offers = now_lines[now_lines.game_id == g.game_id]
+        if len(offers):
+            best = offers.sort_values("total", ascending=(side == "over")).iloc[0]   # over: lowest total
+            now_book, now_line = str(best.book), float(best.total)
+            m_now = float(a_close.blend(np.array([now_line]), np.array([f]))[0])
+            w, _, l = totals.total_probs(dist.pmf(m_now), side, now_line)
+            now_ev = w * payout - l
         rows.append({"game_id": int(g.game_id), "start_date": g.start_date, "away_team": g.away_team,
                      "home_team": g.home_team, "early_total": float(g.early_total),
                      "current_total": None if pd.isna(g.current_total) else float(g.current_total),
                      "F": float(f), "model_total": m, "side": side, "ev": ev, "p_win": p_win, "p_push": p_push,
                      "pick": ev >= cfg.min_ev,
                      "final_total": None if pd.isna(g.home_points) else int(g.home_points + g.away_points),
-                     "distribution": name, "alpha_early": a_early.alpha})
+                     "distribution": name, "alpha_early": a_early.alpha,
+                     "now_book": now_book, "now_line": now_line, "now_ev": now_ev})
     return pd.DataFrame(rows)

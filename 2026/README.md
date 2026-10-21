@@ -6,7 +6,7 @@ Weekly ratings and signals from SP+ and BCF Toys FEI projections blended with th
 
 | | Signals | Record |
 |---|---:|---|
-| Live, posted before kickoff | 4 | 3–1, +1.73 units |
+| Live, posted before kickoff | 9 | 3–1, +1.73 units |
 | Backtest, out-of-sample | 44 | 25–19, +3.73 units |
 | Real bets logged (`cfb log-bet`) | 0 | none logged yet |
 
@@ -33,6 +33,7 @@ Live signals are frozen when posted and graded at the price shown. Backtest week
 | [Week 5](week-05/) | 4 | 2–2, -0.18 units | backtest |
 | [Week 6](week-06/) | 7 | 2–5, -3.18 units | backtest |
 | [Week 7](week-07/) | 4 | 3–1, +1.73 units | live |
+| [Week 8](week-08/) | 5 | no results yet | live |
 
 ## Backtest, 2022–2025
 
@@ -41,7 +42,7 @@ Live signals are frozen when posted and graded at the price shown. Backtest week
   <img alt="Totals at the early number, 2022–2025" src="charts/backtest-light.png">
 </picture>
 
-The headline rule over 2022–2025, each season scored by a model fit only on earlier seasons: 334 signals, 179–150–5 (54.4%), +12.7 units, ROI +3.8%. The closing total moved toward the signal by +0.70 points on average (+0.66 after the usual early-to-close drift).
+The headline rule over 2022–2025, each season scored by a model fit only on earlier seasons: 337 signals, 178–154–5 (53.6%), +7.8 units, ROI +2.3%. The closing total moved toward the signal by +0.70 points on average (+0.67 after the usual early-to-close drift).
 
 
 ## Rules
