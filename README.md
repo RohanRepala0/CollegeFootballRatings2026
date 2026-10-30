@@ -21,6 +21,14 @@ flowchart TB
 The weekly signals and season record are in [`2026/`](2026/README.md). How the data moves from source to signal, with
 more detailed diagrams: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
+## NIL compensation data
+
+A separate layer stores the College Sports Commission's NIL Go and school revenue-share reports:
+every release is versioned and archived in [`data/csc/releases/`](data/csc/releases/), checked for
+internal consistency, and exported to [`data/csc/percentiles.csv`](data/csc/percentiles.csv). Design, caveats and the plan
+for player-level estimates: [`docs/NIL_DATA_ARCHITECTURE.md`](docs/NIL_DATA_ARCHITECTURE.md). Latest
+check and football summary: [`reports/csc_2026-10-30.md`](reports/csc_2026-10-30.md).
+
 ## Setup
 
 ```bash
@@ -104,6 +112,7 @@ cfb week --season 2026 --week 8           # shops FanDuel, DraftKings, Fanatics 
 cfb log-bet GAME_ID --side home --line -6.5 --price -110 --stake 1 --book fanduel
 cfb settle
 cfb status                                # row counts, CFBD calls this month
+cfb ingest-csc --fresh                    # CSC NIL Go + revenue-share percentiles (see below)
 ```
 
 ## Weekly routine

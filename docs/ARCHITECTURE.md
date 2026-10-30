@@ -138,5 +138,7 @@ sequenceDiagram
 | `bets` | `log-bet`, `settle` | `record`, `publish` | one real bet: line, price, stake, close, CLV, result |
 | `exclusions` | `backtest.py`, `totals.py` (via `backtest`, `backtest-totals`, `fit`, `record`, `picks`, `publish`) | `status` | one game dropped by one run, with the reason; re-logged every run |
 | `api_calls` | `fetch.py` | `status` | one CFBD request, against the 1,000-a-month free tier |
+| `csc_releases` | `sources/csc.py` (via `ingest-csc`) | `ingest-csc`, `status` | one distinct College Sports Commission payload, with first and last sighting |
+| `csc_percentiles` | `sources/csc.py` (via `ingest-csc`) | `csc_latest` view, `ingest-csc` report and CSV | one published compensation percentile cell; see [`NIL_DATA_ARCHITECTURE.md`](NIL_DATA_ARCHITECTURE.md) |
 
 Every timestamp is UTC. A week folder in `2026/` is written once; re-running `publish` only adds final scores and results.

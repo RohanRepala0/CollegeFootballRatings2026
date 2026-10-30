@@ -1,0 +1,247 @@
+report,gender,sport,position,cohort,a4,population,n,n_text,p90,p75,p50,p25,p10,window_start,window_end,as_of,release
+nil_go,men,Baseball,All Positions,A4,True,deal_holders,711,,50000.0,20120.0,8000.0,1495.0,595.0,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,men,Baseball,All Positions,Non-A4,False,deal_holders,190,,6257.499999999995,3000.0,1000.0,340.9925,91.60000000000005,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,men,Basketball,All Positions,ACC,True,deal_holders,95,,,21621.5,6250.0,1762.5,,2025-06-11,2026-04-06,,b4cabcad31e5
+nil_go,men,Basketball,All Positions,Big 12,True,deal_holders,112,,134090.89900000006,27500.0,10000.0,4194.1,1650.0,2025-06-11,2026-04-06,,b4cabcad31e5
+nil_go,men,Basketball,All Positions,Big Ten,True,deal_holders,144,,100000.0,40187.5,9100.0,3750.0,1500.0,2025-06-11,2026-04-06,,b4cabcad31e5
+nil_go,men,Basketball,All Positions,Non-A4,False,deal_holders,458,,30375.000000000015,12630.2,5000.0,1250.0,500.0,2025-06-11,2026-04-06,,b4cabcad31e5
+nil_go,men,Basketball,All Positions,SEC,True,deal_holders,155,,79979.99999999999,34850.0,10320.0,3354.83,1235.0,2025-06-11,2026-04-06,,b4cabcad31e5
+nil_go,men,Cross Country,All Positions,A4,True,deal_holders,51,,,24983.5,2500.0,885.5,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,men,Cross Country,All Positions,Non-A4,False,deal_holders,29,,,,341.0,,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,men,Football,Defensive Back,A4,True,deal_holders,646,,200000.0,82600.0,25000.0,1707.75,1500.0,2026-01-01,2026-09-30,,b4cabcad31e5
+nil_go,men,Football,Defensive Back,Non-A4,False,deal_holders,353,,3048.000000000001,1600.0,1560.0,1500.0,1500.0,2026-01-01,2026-09-30,,b4cabcad31e5
+nil_go,men,Football,Defensive Lineman,A4,True,deal_holders,588,,231655.00000000023,100000.0,26500.0,1600.0,1500.0,2026-01-01,2026-09-30,,b4cabcad31e5
+nil_go,men,Football,Defensive Lineman,Non-A4,False,deal_holders,303,,3000.0,1600.0,1569.99,1500.0,1500.0,2026-01-01,2026-09-30,,b4cabcad31e5
+nil_go,men,Football,Kicker,A4,True,deal_holders,81,,,33300.0,6500.0,1570.0,,2026-01-01,2026-09-30,,b4cabcad31e5
+nil_go,men,Football,Kicker,Non-A4,False,deal_holders,55,,,1600.0,1570.0,1500.0,,2026-01-01,2026-09-30,,b4cabcad31e5
+nil_go,men,Football,Linebacker,A4,True,deal_holders,391,,228100.0,86750.0,21500.0,1600.0,1500.0,2026-01-01,2026-09-30,,b4cabcad31e5
+nil_go,men,Football,Linebacker,Non-A4,False,deal_holders,231,,4298.0,1600.0,1550.0,1500.0,1500.0,2026-01-01,2026-09-30,,b4cabcad31e5
+nil_go,men,Football,Long Snapper,A4,True,deal_holders,44,,,9043.7475,1600.0,1500.0,,2026-01-01,2026-09-30,,b4cabcad31e5
+nil_go,men,Football,Long Snapper,Non-A4,False,deal_holders,32,,,,1560.0,,,2026-01-01,2026-09-30,,b4cabcad31e5
+nil_go,men,Football,Offensive Lineman,A4,True,deal_holders,596,,213500.0,95017.5,21600.0,1607.5,1500.0,2026-01-01,2026-09-30,,b4cabcad31e5
+nil_go,men,Football,Offensive Lineman,Non-A4,False,deal_holders,332,,2563.0000000000023,1599.2475,1560.0,1500.0,1500.0,2026-01-01,2026-09-30,,b4cabcad31e5
+nil_go,men,Football,Position Unspecified,A4,True,deal_holders,430,,50000.0,9052.5,1600.0,1500.0,1000.0,2026-01-01,2026-09-30,,b4cabcad31e5
+nil_go,men,Football,Position Unspecified,Non-A4,False,deal_holders,215,,2016.7999999999997,1577.495,1560.0,1500.0,1500.0,2026-01-01,2026-09-30,,b4cabcad31e5
+nil_go,men,Football,Punter,A4,True,deal_holders,33,,,,1660.0,,,2026-01-01,2026-09-30,,b4cabcad31e5
+nil_go,men,Football,Punter,Non-A4,False,deal_holders,27,,,,1500.0,,,2026-01-01,2026-09-30,,b4cabcad31e5
+nil_go,men,Football,Quarterback,A4,True,deal_holders,194,,996048.5000000013,293020.0,65550.0,10722.4875,1570.0,2026-01-01,2026-09-30,,b4cabcad31e5
+nil_go,men,Football,Quarterback,Non-A4,False,deal_holders,130,,21805.00000000002,5387.5,1570.0,1500.0,1155.0,2026-01-01,2026-09-30,,b4cabcad31e5
+nil_go,men,Football,Running Back,A4,True,deal_holders,245,,213011.99999999997,95000.0,26050.0,1600.0,1500.0,2026-01-01,2026-09-30,,b4cabcad31e5
+nil_go,men,Football,Running Back,Non-A4,False,deal_holders,137,,7508.0,1600.0,1500.0,1500.0,1500.0,2026-01-01,2026-09-30,,b4cabcad31e5
+nil_go,men,Football,Tight End,A4,True,deal_holders,233,,158901.10000000006,75000.0,19999.98,1600.0,1500.0,2026-01-01,2026-09-30,,b4cabcad31e5
+nil_go,men,Football,Tight End,Non-A4,False,deal_holders,140,,3359.100000000001,1600.0,1560.0,1500.0,1500.0,2026-01-01,2026-09-30,,b4cabcad31e5
+nil_go,men,Football,Wide Receiver,A4,True,deal_holders,436,,246035.0,99325.0,27785.0,3090.0,1500.0,2026-01-01,2026-09-30,,b4cabcad31e5
+nil_go,men,Football,Wide Receiver,Non-A4,False,deal_holders,253,,4458.0,1600.0,1560.0,1500.0,1500.0,2026-01-01,2026-09-30,,b4cabcad31e5
+nil_go,men,Golf,All Positions,A4,True,deal_holders,117,,42556.00000000003,12000.0,5000.0,1750.0,800.0,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,men,Golf,All Positions,Non-A4,False,deal_holders,68,,,4225.0,1500.0,650.0,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,men,Gymnastics,All Positions,A4,True,deal_holders,23,,,,865.0,,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,men,Gymnastics,All Positions,Non-A4,False,deal_holders,,<10,,,,,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,men,Ice Hockey,All Positions,A4,True,deal_holders,102,,31050.000000000015,14832.5,9049.5,4000.0,1020.0000000000002,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,men,Ice Hockey,All Positions,Non-A4,False,deal_holders,52,,,5000.0,2000.0,1237.5,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,men,Lacrosse,All Positions,A4,True,deal_holders,52,,,6575.0,1662.5,1000.0,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,men,Lacrosse,All Positions,Non-A4,False,deal_holders,27,,,,601.0,,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,men,Soccer,All Positions,A4,True,deal_holders,89,,,2613.0,2222.0,1200.0,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,men,Soccer,All Positions,Non-A4,False,deal_holders,39,,,,600.0,,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,men,Swimming and Diving,All Positions,A4,True,deal_holders,70,,,3875.0,825.0,281.25,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,men,Swimming and Diving,All Positions,Non-A4,False,deal_holders,19,,,,1000.0,,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,men,Tennis,All Positions,A4,True,deal_holders,56,,,24916.75,7172.0,4750.0,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,men,Tennis,All Positions,Non-A4,False,deal_holders,10,,,,2000.0,,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,men,Track & Field (Indoor),All Positions,A4,True,deal_holders,56,,,15782.5,3050.0,1100.0,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,men,Track & Field (Indoor),All Positions,Non-A4,False,deal_holders,22,,,,370.0,,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,men,Track & Field (Outdoor),All Positions,A4,True,deal_holders,129,,79500.00000000003,22000.0,5000.0,1400.0,290.00000000000006,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,men,Track & Field (Outdoor),All Positions,Non-A4,False,deal_holders,43,,,1384.6100000000001,440.0,200.0,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,men,Volleyball,All Positions,A4,True,deal_holders,20,,,,900.0,,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,men,Volleyball,All Positions,Non-A4,False,deal_holders,19,,,,504.0,,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,men,Wrestling,All Positions,A4,True,deal_holders,145,,43961.19999999998,13500.0,4500.0,1498.0,680.002,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,men,Wrestling,All Positions,Non-A4,False,deal_holders,35,,,,2000.0,,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Acrobatics and Tumbling,All Positions,A4,True,deal_holders,13,,,,565.0,,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Acrobatics and Tumbling,All Positions,Non-A4,False,deal_holders,,<10,,,,,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Basketball,All Positions,ACC,True,deal_holders,100,,42175.000000000015,17732.5,7130.0,2011.25,591.6,2025-06-11,2026-04-06,,b4cabcad31e5
+nil_go,women,Basketball,All Positions,Big 12,True,deal_holders,97,,,12000.0,6250.0,4600.0,,2025-06-11,2026-04-06,,b4cabcad31e5
+nil_go,women,Basketball,All Positions,Big Ten,True,deal_holders,162,,40930.00000000001,18739.18,8819.99,3992.5,1502.5,2025-06-11,2026-04-06,,b4cabcad31e5
+nil_go,women,Basketball,All Positions,Non-A4,False,deal_holders,315,,8471.996000000006,4000.0,1250.0,600.0,170.00000000000028,2025-06-11,2026-04-06,,b4cabcad31e5
+nil_go,women,Basketball,All Positions,SEC,True,deal_holders,122,,49575.00000000001,18225.0,7370.0,5000.0,1518.0460000000003,2025-06-11,2026-04-06,,b4cabcad31e5
+nil_go,women,Beach Volleyball,All Positions,A4,True,deal_holders,29,,,,1300.0,,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Beach Volleyball,All Positions,Non-A4,False,deal_holders,37,,,,600.0,,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Cross Country,All Positions,A4,True,deal_holders,125,,27100.00000000003,3500.0,1100.0,700.0,232.0,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Cross Country,All Positions,Non-A4,False,deal_holders,67,,,1425.2350000000001,600.0,90.5,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Equestrian,All Positions,A4,True,deal_holders,18,,,,650.0,,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Equestrian,All Positions,Non-A4,False,deal_holders,,<10,,,,,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Fencing,All Positions,A4,True,deal_holders,15,,,,500.0,,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Fencing,All Positions,Non-A4,False,deal_holders,,<10,,,,,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Field Hockey,All Positions,A4,True,deal_holders,45,,,3425.0,1000.0,200.0,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Field Hockey,All Positions,Non-A4,False,deal_holders,16,,,,900.0,,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Golf,All Positions,A4,True,deal_holders,112,,25720.000000000004,9437.5,2500.0,1000.0,320.0000000000003,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Golf,All Positions,Non-A4,False,deal_holders,54,,,3000.0,1000.0,623.875,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Gymnastics,All Positions,A4,True,deal_holders,234,,13640.000000000004,7920.0,2477.5,1000.0,263.15,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Gymnastics,All Positions,Non-A4,False,deal_holders,49,,,1900.0,1150.0,285.0,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Ice Hockey,All Positions,A4,True,deal_holders,28,,,,3413.0,,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Ice Hockey,All Positions,Non-A4,False,deal_holders,34,,,,960.0,,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Lacrosse,All Positions,A4,True,deal_holders,145,,6549.999999999997,2000.0,625.0,500.0,88.20000000000002,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Lacrosse,All Positions,Non-A4,False,deal_holders,53,,,867.0,224.0,61.92,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Rowing,All Positions,A4,True,deal_holders,80,,,1000.0,500.0,500.0,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Rowing,All Positions,Non-A4,False,deal_holders,15,,,,165.0,,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Soccer,All Positions,A4,True,deal_holders,363,,10000.0,4975.0,1500.0,500.0,132.872,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Soccer,All Positions,Non-A4,False,deal_holders,230,,3000.0,1200.0,600.0,140.0,50.0,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Softball,All Positions,A4,True,deal_holders,408,,21825.99700000001,7447.5,2500.0,915.0,250.0,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Softball,All Positions,Non-A4,False,deal_holders,173,,2485.000000000001,1150.0,500.0,100.0,34.0,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Stunt,All Positions,A4,True,deal_holders,11,,,,117.0,,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Stunt,All Positions,Non-A4,False,deal_holders,,<10,,,,,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Swimming and Diving,All Positions,A4,True,deal_holders,146,,8928.0,2150.0,755.0,400.0,106.0,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Swimming and Diving,All Positions,Non-A4,False,deal_holders,34,,,,335.98,,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Tennis,All Positions,A4,True,deal_holders,61,,,3446.06,1262.0,509.0,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Tennis,All Positions,Non-A4,False,deal_holders,20,,,,870.0,,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Track & Field (Indoor),All Positions,A4,True,deal_holders,46,,,6690.9925,1600.0,607.5,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Track & Field (Indoor),All Positions,Non-A4,False,deal_holders,26,,,,521.425,,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Track & Field (Outdoor),All Positions,A4,True,deal_holders,229,,45360.000000000015,11935.0,2500.0,500.0,200.0,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Track & Field (Outdoor),All Positions,Non-A4,False,deal_holders,111,,6148.13,1930.0,720.0,137.0,46.66,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Volleyball,All Positions,A4,True,deal_holders,423,,18058.0,8000.0,3200.0,1000.0,300.0,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Volleyball,All Positions,Non-A4,False,deal_holders,218,,3650.0000000000055,1899.75,650.0,157.825,50.0,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Water Polo,All Positions,A4,True,deal_holders,,<10,,,,,,2025-06-11,2026-06-30,,b4cabcad31e5
+nil_go,women,Water Polo,All Positions,Non-A4,False,deal_holders,21,,,,30.0,,,2025-06-11,2026-06-30,,b4cabcad31e5
+revenue_share,men,Baseball,All Positions,A4,True,all_rostered,2498,,20000.0,500.0,0.0,0.0,0.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Baseball,All Positions,A4,True,paid,712,,62000.0,30000.0,12000.0,5000.0,500.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Baseball,All Positions,Non-A4,False,paid,747,,24500.0,15000.0,7500.0,3000.0,500.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Basketball,All Positions,ACC,True,all_rostered,276,,500500.0,300000.0,38000.0,0.0,0.0,2025-07-01,2026-04-06,,a2ec7da1ead1
+revenue_share,men,Basketball,All Positions,ACC,True,paid,169,,648000.0,440000.0,225000.0,50000.0,20500.0,2025-07-01,2026-04-06,,a2ec7da1ead1
+revenue_share,men,Basketball,All Positions,Big 12,True,all_rostered,248,,579000.0,285500.0,100000.0,4500.0,0.0,2025-07-01,2026-04-06,,a2ec7da1ead1
+revenue_share,men,Basketball,All Positions,Big 12,True,paid,196,,662500.0,350000.0,150500.0,54000.0,21500.0,2025-07-01,2026-04-06,,a2ec7da1ead1
+revenue_share,men,Basketball,All Positions,Big Ten,True,all_rostered,278,,462500.0,271000.0,48000.0,0.0,0.0,2025-07-01,2026-04-06,,a2ec7da1ead1
+revenue_share,men,Basketball,All Positions,Big Ten,True,paid,165,,559500.0,397500.0,187500.0,80000.0,21500.0,2025-07-01,2026-04-06,,a2ec7da1ead1
+revenue_share,men,Basketball,All Positions,Non-A4,False,all_rostered,3667,,165000.0,50000.0,8500.0,0.0,0.0,2025-07-01,2026-04-06,,a2ec7da1ead1
+revenue_share,men,Basketball,All Positions,Non-A4,False,paid,2303,,250000.0,92500.0,33000.0,10500.0,4500.0,2025-07-01,2026-04-06,,a2ec7da1ead1
+revenue_share,men,Basketball,All Positions,SEC,True,all_rostered,253,,339500.0,157500.0,0.0,0.0,0.0,2025-07-01,2026-04-06,,a2ec7da1ead1
+revenue_share,men,Basketball,All Positions,SEC,True,paid,114,,599500.0,322000.0,175000.0,117500.0,50000.0,2025-07-01,2026-04-06,,a2ec7da1ead1
+revenue_share,men,Cross Country,All Positions,A4,True,paid,24,,,,500.0,,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Cross Country,All Positions,Non-A4,False,paid,18,,,,500.0,,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Fencing,All Positions,A4,True,all_rostered,149,,500.0,0.0,0.0,0.0,0.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Fencing,All Positions,A4,True,paid,26,,,,500.0,,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Football,Defensive Back,A4,True,all_rostered,1444,,377000.0,200000.0,75000.0,14000.0,0.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Defensive Back,A4,True,paid,1141,,416000.0,250000.0,115000.0,50000.0,23500.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Defensive Back,Non-A4,False,all_rostered,3270,,30000.0,3500.0,0.0,0.0,0.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Defensive Back,Non-A4,False,paid,981,,89000.0,45000.0,15000.0,6000.0,2500.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Defensive Lineman,A4,True,all_rostered,1060,,496000.0,275000.0,105000.0,25000.0,0.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Defensive Lineman,A4,True,paid,885,,509500.0,309500.0,150000.0,60000.0,25000.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Defensive Lineman,Non-A4,False,all_rostered,2412,,42500.0,7000.0,0.0,0.0,0.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Defensive Lineman,Non-A4,False,paid,837,,103000.0,50000.0,18000.0,6000.0,3000.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Kicker,A4,True,all_rostered,194,,93500.0,48500.0,1000.0,0.0,0.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Kicker,A4,True,paid,99,,,87500.0,48500.0,24000.0,,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Kicker,Non-A4,False,all_rostered,458,,6500.0,0.0,0.0,0.0,0.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Kicker,Non-A4,False,paid,72,,,22500.0,12000.0,5000.0,,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Linebacker,A4,True,all_rostered,858,,363500.0,190000.0,66000.0,500.0,0.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Linebacker,A4,True,paid,643,,425500.0,246500.0,112500.0,50000.0,24000.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Linebacker,Non-A4,False,all_rostered,1924,,31000.0,3000.0,0.0,0.0,0.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Linebacker,Non-A4,False,paid,554,,99500.0,49000.0,17500.0,6000.0,2500.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Long Snapper,A4,True,all_rostered,149,,45500.0,20000.0,0.0,0.0,0.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Long Snapper,A4,True,paid,57,,,46500.0,30000.0,12500.0,,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Long Snapper,Non-A4,False,all_rostered,304,,500.0,0.0,0.0,0.0,0.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Long Snapper,Non-A4,False,paid,33,,,,10000.0,,,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Offensive Lineman,A4,True,all_rostered,1398,,474000.0,264500.0,75500.0,10500.0,0.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Offensive Lineman,A4,True,paid,1105,,512000.0,312500.0,133000.0,50000.0,22500.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Offensive Lineman,Non-A4,False,all_rostered,3156,,40000.0,4500.0,0.0,0.0,0.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Offensive Lineman,Non-A4,False,paid,968,,112000.0,51000.0,17500.0,6000.0,2500.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Position Unspecified,A4,True,all_rostered,162,,297000.0,212000.0,96000.0,11000.0,0.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Position Unspecified,A4,True,paid,127,,348500.0,237000.0,150000.0,52500.0,25000.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Position Unspecified,Non-A4,False,all_rostered,1669,,13000.0,1500.0,0.0,0.0,0.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Position Unspecified,Non-A4,False,paid,447,,50000.0,24000.0,7500.0,2500.0,2000.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Punter,A4,True,all_rostered,131,,100000.0,56000.0,1000.0,0.0,0.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Punter,A4,True,paid,66,,,88500.0,56000.0,26000.0,,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Punter,Non-A4,False,all_rostered,230,,10500.0,0.0,0.0,0.0,0.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Punter,Non-A4,False,paid,47,,,25000.0,10000.0,4500.0,,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Quarterback,A4,True,all_rostered,367,,1266500.0,350000.0,75000.0,0.0,0.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Quarterback,A4,True,paid,257,,1611000.0,675000.0,230000.0,60000.0,23500.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Quarterback,Non-A4,False,all_rostered,829,,79500.0,8000.0,0.0,0.0,0.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Quarterback,Non-A4,False,paid,256,,260000.0,127000.0,31000.0,10000.0,4000.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Running Back,A4,True,all_rostered,495,,310500.0,177500.0,60000.0,0.0,0.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Running Back,A4,True,paid,360,,383000.0,236000.0,108500.0,50000.0,24000.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Running Back,Non-A4,False,all_rostered,1170,,30000.0,3000.0,0.0,0.0,0.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Running Back,Non-A4,False,paid,348,,100000.0,45000.0,16000.0,5500.0,2500.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Tight End,A4,True,all_rostered,496,,264500.0,150000.0,50000.0,0.0,0.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Tight End,A4,True,paid,370,,300000.0,199000.0,93000.0,40000.0,17500.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Tight End,Non-A4,False,all_rostered,1023,,23500.0,2500.0,0.0,0.0,0.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Tight End,Non-A4,False,paid,299,,66000.0,31000.0,14000.0,5000.0,1500.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Wide Receiver,A4,True,all_rostered,989,,375000.0,189000.0,57000.0,0.0,0.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Wide Receiver,A4,True,paid,707,,456000.0,247000.0,112500.0,49500.0,20000.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Wide Receiver,Non-A4,False,all_rostered,2310,,30000.0,2500.0,0.0,0.0,0.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Football,Wide Receiver,Non-A4,False,paid,660,,100000.0,46000.0,15000.0,5500.0,2000.0,2026-01-01,2026-12-31,2026-09-30,a2ec7da1ead1
+revenue_share,men,Golf,All Positions,A4,True,all_rostered,596,,500.0,0.0,0.0,0.0,0.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Golf,All Positions,A4,True,paid,92,,,4500.0,500.0,500.0,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Golf,All Positions,Non-A4,False,paid,107,,14000.0,7000.0,3000.0,1000.0,500.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Ice Hockey,All Positions,A4,True,all_rostered,187,,20000.0,8500.0,500.0,0.0,0.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Ice Hockey,All Positions,A4,True,paid,104,,25000.0,15000.0,6500.0,4000.0,500.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Ice Hockey,All Positions,Non-A4,False,all_rostered,791,,8000.0,0.0,0.0,0.0,0.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Ice Hockey,All Positions,Non-A4,False,paid,169,,23500.0,13000.0,7500.0,4500.0,2000.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Lacrosse,All Positions,A4,True,all_rostered,601,,500.0,0.0,0.0,0.0,0.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Lacrosse,All Positions,A4,True,paid,66,,,500.0,500.0,500.0,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Lacrosse,All Positions,Non-A4,False,paid,16,,,,5000.0,,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Skiing,All Positions,A4,True,paid,16,,,,2000.0,,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Soccer,All Positions,A4,True,all_rostered,753,,500.0,0.0,0.0,0.0,0.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Soccer,All Positions,A4,True,paid,109,,8500.0,2500.0,1500.0,500.0,500.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Soccer,All Positions,Non-A4,False,paid,143,,10000.0,5000.0,1500.0,500.0,500.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Swimming and Diving,All Positions,A4,True,paid,56,,,500.0,500.0,500.0,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Tennis,All Positions,A4,True,all_rostered,534,,500.0,0.0,0.0,0.0,0.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Tennis,All Positions,A4,True,paid,66,,,9000.0,3000.0,500.0,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Tennis,All Positions,Non-A4,False,paid,52,,,10000.0,6000.0,1500.0,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Track & Field (Indoor),All Positions,A4,True,paid,26,,,,500.0,,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Track & Field (Indoor),All Positions,Non-A4,False,paid,61,,,3000.0,500.0,500.0,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Track & Field (Outdoor),All Positions,A4,True,paid,215,,7500.0,3500.0,1000.0,500.0,500.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Track & Field (Outdoor),All Positions,Non-A4,False,paid,124,,6500.0,2500.0,1000.0,500.0,500.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Volleyball,All Positions,Non-A4,False,paid,14,,,,13500.0,,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Wrestling,All Positions,A4,True,all_rostered,833,,1000.0,0.0,0.0,0.0,0.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Wrestling,All Positions,A4,True,paid,89,,,30500.0,10000.0,1000.0,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,men,Wrestling,All Positions,Non-A4,False,paid,21,,,,6000.0,,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Acrobatics and Tumbling,All Positions,A4,True,all_rostered,93,,,500.0,500.0,0.0,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Acrobatics and Tumbling,All Positions,A4,True,paid,49,,,500.0,500.0,500.0,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Basketball,All Positions,ACC,True,all_rostered,239,,85000.0,47000.0,10000.0,0.0,0.0,2025-07-01,2026-04-06,,a2ec7da1ead1
+revenue_share,women,Basketball,All Positions,ACC,True,paid,150,,125500.0,67500.0,37500.0,14500.0,6000.0,2025-07-01,2026-04-06,,a2ec7da1ead1
+revenue_share,women,Basketball,All Positions,Big 12,True,all_rostered,213,,70500.0,34000.0,11500.0,0.0,0.0,2025-07-01,2026-04-06,,a2ec7da1ead1
+revenue_share,women,Basketball,All Positions,Big 12,True,paid,145,,112500.0,45500.0,21000.0,11500.0,8000.0,2025-07-01,2026-04-06,,a2ec7da1ead1
+revenue_share,women,Basketball,All Positions,Big Ten,True,all_rostered,252,,165000.0,84500.0,31000.0,8500.0,0.0,2025-07-01,2026-04-06,,a2ec7da1ead1
+revenue_share,women,Basketball,All Positions,Big Ten,True,paid,200,,175500.0,108000.0,50000.0,19500.0,11500.0,2025-07-01,2026-04-06,,a2ec7da1ead1
+revenue_share,women,Basketball,All Positions,Non-A4,False,all_rostered,3330,,20000.0,6500.0,0.0,0.0,0.0,2025-07-01,2026-04-06,,a2ec7da1ead1
+revenue_share,women,Basketball,All Positions,Non-A4,False,paid,1468,,36000.0,19000.0,8000.0,3500.0,1500.0,2025-07-01,2026-04-06,,a2ec7da1ead1
+revenue_share,women,Basketball,All Positions,SEC,True,all_rostered,213,,67500.0,35000.0,0.0,0.0,0.0,2025-07-01,2026-04-06,,a2ec7da1ead1
+revenue_share,women,Basketball,All Positions,SEC,True,paid,98,,,64000.0,45000.0,15500.0,,2025-07-01,2026-04-06,,a2ec7da1ead1
+revenue_share,women,Beach Volleyball,All Positions,A4,True,all_rostered,185,,1500.0,500.0,0.0,0.0,0.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Beach Volleyball,All Positions,A4,True,paid,53,,,2000.0,1000.0,500.0,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Beach Volleyball,All Positions,Non-A4,False,paid,18,,,,3000.0,,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Bowling,All Positions,Non-A4,False,paid,18,,,,500.0,,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Cross Country,All Positions,A4,True,paid,22,,,,500.0,,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Equestrian,All Positions,A4,True,all_rostered,354,,500.0,0.0,0.0,0.0,0.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Equestrian,All Positions,A4,True,paid,74,,,500.0,500.0,500.0,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Fencing,All Positions,A4,True,all_rostered,157,,500.0,0.0,0.0,0.0,0.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Fencing,All Positions,A4,True,paid,23,,,,500.0,,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Field Hockey,All Positions,A4,True,paid,33,,,,500.0,,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Field Hockey,All Positions,Non-A4,False,paid,55,,,4500.0,500.0,500.0,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Golf,All Positions,A4,True,all_rostered,534,,500.0,0.0,0.0,0.0,0.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Golf,All Positions,A4,True,paid,82,,,6500.0,1000.0,500.0,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Golf,All Positions,Non-A4,False,paid,53,,,5000.0,3000.0,1000.0,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Gymnastics,All Positions,A4,True,all_rostered,620,,3000.0,0.0,0.0,0.0,0.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Gymnastics,All Positions,A4,True,paid,93,,,14500.0,6000.0,2500.0,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Gymnastics,All Positions,Non-A4,False,paid,35,,,,1500.0,,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Ice Hockey,All Positions,Non-A4,False,paid,28,,,,500.0,,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Lacrosse,All Positions,A4,True,paid,90,,,4000.0,500.0,500.0,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Lacrosse,All Positions,Non-A4,False,paid,81,,,500.0,500.0,500.0,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Rifle,All Positions,A4,True,paid,10,,,,500.0,,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Rowing,All Positions,A4,True,paid,146,,1000.0,500.0,500.0,500.0,500.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Rowing,All Positions,Non-A4,False,paid,52,,,500.0,500.0,500.0,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Skiing,All Positions,A4,True,paid,13,,,,2500.0,,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Soccer,All Positions,A4,True,all_rostered,1878,,500.0,0.0,0.0,0.0,0.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Soccer,All Positions,A4,True,paid,315,,10000.0,5500.0,1000.0,500.0,500.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Soccer,All Positions,Non-A4,False,paid,205,,6000.0,3000.0,1000.0,500.0,500.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Softball,All Positions,A4,True,all_rostered,1362,,7500.0,0.0,0.0,0.0,0.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Softball,All Positions,A4,True,paid,310,,35000.0,20000.0,6000.0,1000.0,500.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Softball,All Positions,Non-A4,False,paid,332,,15000.0,5000.0,2000.0,500.0,500.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Swimming and Diving,All Positions,A4,True,paid,112,,5000.0,1000.0,1000.0,500.0,500.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Swimming and Diving,All Positions,Non-A4,False,paid,95,,,3000.0,500.0,500.0,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Tennis,All Positions,A4,True,all_rostered,629,,1000.0,0.0,0.0,0.0,0.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Tennis,All Positions,A4,True,paid,96,,,6000.0,2000.0,500.0,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Tennis,All Positions,Non-A4,False,paid,87,,,8000.0,3000.0,1500.0,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Track & Field (Indoor),All Positions,A4,True,paid,48,,,7500.0,1000.0,500.0,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Track & Field (Outdoor),All Positions,A4,True,all_rostered,2840,,500.0,0.0,0.0,0.0,0.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Track & Field (Outdoor),All Positions,A4,True,paid,290,,6000.0,4000.0,500.0,500.0,500.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Track & Field (Outdoor),All Positions,Non-A4,False,paid,221,,6000.0,1000.0,500.0,500.0,500.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Triathlon,All Positions,A4,True,paid,15,,,,500.0,,,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Volleyball,All Positions,A4,True,all_rostered,1153,,26000.0,5000.0,0.0,0.0,0.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Volleyball,All Positions,A4,True,paid,466,,50000.0,25500.0,10000.0,2000.0,500.0,2025-07-01,2026-06-30,,a2ec7da1ead1
+revenue_share,women,Volleyball,All Positions,Non-A4,False,paid,326,,13500.0,6000.0,3000.0,1000.0,500.0,2025-07-01,2026-06-30,,a2ec7da1ead1

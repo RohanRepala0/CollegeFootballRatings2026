@@ -179,3 +179,72 @@ def sp_validation_from_db(con, season: int, performance: pd.DataFrame, tolerance
         m[c] = m[c].fillna(0).astype(int)
     m["ok"] = ((m.w - m.w_bill).abs() <= tolerance) & ((m.l - m.l_bill).abs() <= tolerance)
     return m
+
+
+def _usd(v) -> str:
+    return "" if pd.isna(v) else f"${v:,.0f}"
+
+
+def _pct(v) -> str:
+    return "" if pd.isna(v) else f"{v:.0%}"
+
+
+def csc_report(con, issues: list[dict], path: Path | None = None) -> Path:
+    """The College Sports Commission releases on file, their checks, and football across both reports."""
+    from .sources.csc import FOOTBALL_POSITIONS
+
+    releases = con.execute("""
+        SELECT report, left(payload_sha256, 12) AS release, first_seen_at, last_seen_at, n_cohorts, archive_path
+        FROM csc_releases ORDER BY report, first_seen_at""").df()
+    releases["archive_path"] = [Path(p).name for p in releases.archive_path]
+
+    fb = con.execute("""
+        WITH cell AS (
+            SELECT position, cohort, population, any_value(n) AS n,
+                   max(value_usd) FILTER (WHERE percentile = 50) AS p50,
+                   max(value_usd) FILTER (WHERE percentile = 90) AS p90
+            FROM csc_latest WHERE sport = 'Football' AND gender = 'men' GROUP BY ALL)
+        SELECT r.cohort AS cut, r.position, r.n AS rostered, p.n AS paid, p.p50 AS paid_p50, p.p90 AS paid_p90,
+               d.n AS nil_deal_holders, d.p50 AS nil_p50, d.p90 AS nil_p90
+        FROM cell r
+        LEFT JOIN cell p ON p.position = r.position AND p.cohort = r.cohort AND p.population = 'paid'
+        LEFT JOIN cell d ON d.position = r.position AND d.cohort = r.cohort AND d.population = 'deal_holders'
+        WHERE r.population = 'all_rostered'""").df()
+    fb["position"] = pd.Categorical(fb.position, list(FOOTBALL_POSITIONS), ordered=True)
+    fb = fb.sort_values(["cut", "position"])
+    totals = fb.groupby("cut", as_index=False)[["rostered", "paid", "nil_deal_holders"]].sum().assign(position="All")
+    fb = pd.concat([fb, totals]).sort_values("cut", kind="stable")
+    table = pd.DataFrame({
+        "cut": fb.cut, "position": fb.position.astype(str), "rostered": fb.rostered.astype(int),
+        "paid share": [_pct(p / r) for p, r in zip(fb.paid, fb.rostered)],
+        "paid median": fb.paid_p50.map(_usd), "paid p90": fb.paid_p90.map(_usd),
+        "NIL deal holders / rostered": [_pct(d / r) for d, r in zip(fb.nil_deal_holders, fb.rostered)],
+        "NIL median": fb.nil_p50.map(_usd), "NIL p90": fb.nil_p90.map(_usd),
+    })
+
+    counts = pd.DataFrame(issues, columns=["check", "severity", "report", "key", "detail"])
+    summary = counts.groupby(["check", "severity"]).size().rename("count").reset_index() if len(counts) else counts
+    parts = [
+        f"# College Sports Commission compensation data, {utcnow():%Y-%m-%d}\n",
+        "Built by `cfb ingest-csc` from the NIL Go and school revenue-share reports. Design and caveats: "
+        "[`docs/NIL_DATA_ARCHITECTURE.md`](../docs/NIL_DATA_ARCHITECTURE.md).\n",
+        "## Releases on file\n", releases.to_markdown(index=False) + "\n",
+        "## Checks\n",
+        "Monotone percentiles, suppression thresholds, With $0 vs Without $0 zero-mass agreement, football "
+        "coverage, NIL deal holders vs roster size, and SVG vs table data. "
+        + ("All passed.\n" if counts.empty else "\n"),
+    ]
+    if len(counts):
+        parts += [summary.to_markdown(index=False) + "\n", counts.head(50).to_markdown(index=False) + "\n"]
+    parts += [
+        "## Football across both reports\n",
+        "Rostered and paid come from revenue share (CAPS, payments in calendar 2026). NIL deal holders are "
+        "athletes with a cleared NIL Go deal from Jan 1 to Sep 30, 2026. The two systems label positions "
+        "separately, so the NIL ratio is approximate by position (Position Unspecified differs most). "
+        "Medians and 90th percentiles are among paid athletes or deal holders, not the whole roster.\n",
+        table.to_markdown(index=False) + "\n",
+    ]
+    path = path or config.REPORTS_DIR / f"csc_{utcnow():%Y-%m-%d}.md"
+    path.write_text("\n".join(parts))
+    return path
+
