@@ -42,7 +42,8 @@ def status():
     from .fetch import calls_this_month
 
     con = _con()
-    for t in ("games", "teams", "lines", "source_projections", "source_ratings", "bets", "exclusions"):
+    for t in ("games", "teams", "lines", "source_projections", "source_ratings", "bets", "exclusions",
+              "csc_releases", "csc_percentiles"):
         typer.echo(f"{t:20s} {con.execute(f'SELECT count(*) FROM {t}').fetchone()[0]:>8}")
     budget = config.sources()["cfbd"].get("monthly_call_budget", 1000)
     typer.echo(f"CFBD calls this month: {calls_this_month(con)} / {budget}")
@@ -309,6 +310,32 @@ def settle():
     _, dist = load_production()
     typer.echo(f"settled {_settle(con, dist)}")
     typer.echo(json.dumps(summary(con), indent=2, default=float))
+
+
+@app.command("ingest-csc")
+def ingest_csc(fresh: bool = typer.Option(False, help="Take new snapshots of the live pages."),
+               from_archive: bool = typer.Option(False, "--from-archive",
+                                                 help="Rebuild from data/csc/releases/ without the network.")):
+    """College Sports Commission NIL Go and revenue-share percentiles: store, check, export."""
+    from .reports import csc_report
+    from .sources import csc
+
+    con = _con()
+    if from_archive:
+        results = csc.ingest_archive(con)
+    else:
+        from .fetch import Fetcher
+
+        results = csc.ingest(con, Fetcher(con), fresh=fresh)
+    for r in results:
+        typer.echo(f"{r['report']:14s} release {r['release']}  {'NEW' if r['new'] else 'unchanged':9s} "
+                   f"{r['cohorts']} cohorts, {r['rows']} cells  {r['archive']}")
+    issues = [i for r in results for i in r["issues"]] + csc.check(con.execute("SELECT * FROM csc_latest").df())
+    csv, report = csc.export_latest(con), csc_report(con, issues)
+    errors = sum(i["severity"] == "error" for i in issues)
+    typer.echo(f"{len(issues)} issues, {errors} errors\n{csv}\n{report}")
+    if errors:
+        raise typer.Exit(1)
 
 
 if __name__ == "__main__":

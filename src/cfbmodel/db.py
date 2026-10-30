@@ -126,6 +126,46 @@ CREATE TABLE IF NOT EXISTS api_calls (
     url        VARCHAR NOT NULL,
     called_at  TIMESTAMPTZ NOT NULL
 );
+
+-- College Sports Commission compensation reports (sources/csc.py). A release is one distinct
+-- decoded payload; refetching an unchanged page only moves last_seen_at.
+CREATE TABLE IF NOT EXISTS csc_releases (
+    report          VARCHAR NOT NULL CHECK (report IN ('nil_go', 'revenue_share')),
+    payload_sha256  VARCHAR NOT NULL,
+    url             VARCHAR NOT NULL,
+    first_seen_at   TIMESTAMPTZ NOT NULL,
+    last_seen_at    TIMESTAMPTZ NOT NULL,
+    archive_path    VARCHAR NOT NULL,
+    n_cohorts       INTEGER NOT NULL
+);
+
+-- One row per published percentile cell. Long format: a cohort is
+-- (report, gender, sport, position, cohort, population, window_label).
+CREATE TABLE IF NOT EXISTS csc_percentiles (
+    report          VARCHAR NOT NULL CHECK (report IN ('nil_go', 'revenue_share')),
+    payload_sha256  VARCHAR NOT NULL,
+    gender          VARCHAR NOT NULL CHECK (gender IN ('men', 'women', 'mixed')),
+    sport           VARCHAR NOT NULL,
+    position        VARCHAR NOT NULL,
+    cohort          VARCHAR NOT NULL,
+    a4              BOOLEAN,
+    population      VARCHAR NOT NULL CHECK (population IN ('all_rostered', 'paid', 'deal_holders')),
+    n               INTEGER,
+    n_text          VARCHAR,
+    percentile      INTEGER NOT NULL,
+    value_usd       DOUBLE,
+    min_n           INTEGER,
+    window_start    DATE,
+    window_end      DATE,
+    as_of           DATE,
+    window_label    VARCHAR,
+    source_ref      VARCHAR NOT NULL
+);
+
+CREATE OR REPLACE VIEW csc_latest AS
+SELECT p.* FROM csc_percentiles p
+JOIN (SELECT report, arg_max(payload_sha256, first_seen_at) AS payload_sha256
+      FROM csc_releases GROUP BY report) r USING (report, payload_sha256);
 """
 
 
