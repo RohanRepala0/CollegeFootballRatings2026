@@ -6,8 +6,8 @@ Weekly ratings and signals from SP+ and BCF Toys FEI projections blended with th
 
 | | Signals | Record |
 |---|---:|---|
-| Live, posted before kickoff | 9 | 3–1, +1.73 units |
-| Backtest, out-of-sample | 44 | 25–19, +3.73 units |
+| Live, posted before kickoff | 19 | 7–2, +4.36 units |
+| Backtest, out-of-sample | 76 | 40–35–1, +1.36 units |
 | Real bets logged (`cfb log-bet`) | 0 | none logged yet |
 
 <picture>
@@ -33,7 +33,11 @@ Live signals are frozen when posted and graded at the price shown. Backtest week
 | [Week 5](week-05/) | 4 | 2–2, -0.18 units | backtest |
 | [Week 6](week-06/) | 7 | 2–5, -3.18 units | backtest |
 | [Week 7](week-07/) | 4 | 3–1, +1.73 units | live |
-| [Week 8](week-08/) | 5 | no results yet | live |
+| [Week 8](week-08/) | 5 | 4–1, +2.64 units | live |
+| [Week 9](week-09/) | 9 | 2–6–1, -4.18 units | backtest |
+| [Week 10](week-10/) | 11 | 5–6, -1.45 units | backtest |
+| [Week 11](week-11/) | 12 | 8–4, +3.27 units | backtest |
+| [Week 12](week-12/) | 10 | no results yet | live |
 
 ## Backtest, 2022–2025
 
